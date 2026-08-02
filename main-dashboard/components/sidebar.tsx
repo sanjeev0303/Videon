@@ -198,7 +198,7 @@ const Sidebar = () => {
           {!collapsed && (
             <Link href="/" className="w-28 -mt-2 shrink-0">
               <div className="hidden dark:block">
-                <Logo />
+                <Image src="/logo.png" alt="Videon Logo" width={120} height={40} className="w-30 object-contain" />
               </div>
               <div className="block dark:hidden">
                 <LogoLight />

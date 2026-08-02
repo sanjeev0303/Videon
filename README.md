@@ -1,11 +1,11 @@
 <div align="center">
   <br />
   <a href="https://videon.com">
-    <img src="https://res.cloudinary.com/df0nvtma5/image/upload/v1785691142/tbxtxa6r8yrjlcnxvprr.png" alt="Videon Logo" width="120" />
+    <img src="https://res.cloudinary.com/df0nvtma5/image/upload/v1785691142/tbxtxa6r8yrjlcnxvprr.png" alt="Videon Logo" width="250" />
   </a>
   <br />
 
-  <h1 align="center">Videon</h1>
+  <h1 align="center" style="font-size: 48px;">Videon</h1>
 
   <p align="center">
     <strong>The Open-Source, AI-Powered Video Hosting & Streaming Infrastructure.</strong>

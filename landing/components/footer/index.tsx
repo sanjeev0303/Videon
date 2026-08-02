@@ -5,7 +5,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import Logo from "@/assets/svgs/logo";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -16,7 +16,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="lg:col-span-1">
             <Link href="#" className="flex items-center gap-1">
-              <Logo className="w-25" />
+              <Image src="/logos/logo.png" alt="Videon Logo" width={100} height={33} className="w-25 object-contain" />
             </Link>
             <p className="mt-2 text-xs text-muted-foreground">
               The developer platform for <br /> video production workloads.
@@ -32,14 +32,14 @@ export default function Footer() {
               Docs
             </Link>
             <Link
-              href="https://x.com/oneminutestack"
+              href="https://x.com/motionmesh"
               target="_blank"
               className="hover:text-slate-300 transition-colors"
             >
               Twitter
             </Link>
             <Link
-              href="https://github.com/one-minute-stack"
+              href="https://github.com/sanjeev0303/videon"
               target="_blank"
               className="hover:text-slate-300 transition-colors"
             >
@@ -79,7 +79,7 @@ export default function Footer() {
 
         <div className="mt-8 border-t border-slate-900 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[0.7rem] text-slate-600">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-            <div>© {currentYear} OneMinute Stack Inc.</div>
+            <div>© {currentYear} Motionmesh Inc.</div>
             <div className="hidden sm:block text-slate-800">•</div>
             <div className="flex items-center gap-1">
               Built with <span className="text-red-500 mx-1">❤️</span> for

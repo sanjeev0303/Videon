@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import Logo from "@/assets/svgs/logo";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 
@@ -12,7 +12,7 @@ const Navbar = () => {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Logo />
+          <Image src="/logos/logo.png" alt="Videon Logo" width={120} height={40} className="w-30 object-contain" />
         </Link>
 
         {/* Navigation Links */}
