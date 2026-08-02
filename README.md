@@ -1,7 +1,7 @@
 <div align="center">
   <br />
   <a href="https://videon.com">
-    <img src="https://raw.githubusercontent.com/sanjeev0303/Videon/main/public/logo.svg" alt="Videon Logo" width="120" />
+    <img src="https://res.cloudinary.com/df0nvtma5/image/upload/v1785691142/tbxtxa6r8yrjlcnxvprr.png" alt="Videon Logo" width="120" />
   </a>
   <br />
 
@@ -95,19 +95,19 @@ graph TD;
     Client((Internet)) --> Landing[Next.js Landing]
     Client --> Dashboard[Next.js Dashboard]
     Client --> SDK[Videon SDK & Player]
-    
+
     Dashboard --> API[Express API]
     SDK --> API
-    
+
     API --> Redis[(Redis Cache)]
     API --> Postgres[(PostgreSQL DB)]
     API --> S3[(AWS S3 Storage)]
-    
+
     API -- Events --> NATS[NATS Message Broker]
-    
+
     NATS --> TranscodeWorker[Media Convert Worker]
     NATS --> AnalyticsWorker[Analytics Aggregator]
-    
+
     TranscodeWorker --> S3
     TranscodeWorker --> Postgres
     AnalyticsWorker --> Postgres
@@ -306,7 +306,7 @@ docker build -t videon-dashboard -f apps/main-dashboard/Dockerfile .
 
 ## 📚 API Documentation
 
-Videon's REST API is designed around domains. 
+Videon's REST API is designed around domains.
 
 ### Modules Available
 
@@ -346,9 +346,9 @@ import "@videon/player/styles.css";
 export default function VideoPage() {
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <VideonPlayer 
-        videoTrackingId="vid_123456789" 
-        autoPlay={true} 
+      <VideonPlayer
+        videoTrackingId="vid_123456789"
+        autoPlay={true}
         playsInline={true}
         onReady={() => console.log("Player is ready")}
         onError={(err) => console.error("Playback error", err)}
@@ -427,7 +427,7 @@ We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) fo
 
 - **Linter**: ESLint + Prettier.
 - **Language**: Strict TypeScript (`"strict": true` in `tsconfig.json`).
-- **Conventions**: 
+- **Conventions**:
   - Interfaces: Prefix with `I` (e.g., `IVideoService`).
   - Files: `kebab-case.ts`.
   - Folders: Grouped by module domain (e.g., `/src/modules/billing`).
