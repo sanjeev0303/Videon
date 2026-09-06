@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Hubot_Sans, Martian_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import QueryProvider from "@/providers/query-provider";
@@ -7,13 +7,18 @@ import ThemeWrapper from "@/providers/theme-provider";
 import { Toaster } from "sonner";
 import Sidebar from "@/components/sidebar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const hubot = Hubot_Sans({
+  variable: "--font-hubot",
+  subsets: ["latin"],
+});
+
+const martian = Martian_Mono({
+  variable: "--font-martian",
   subsets: ["latin"],
 });
 
@@ -32,13 +37,13 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${bricolage.variable} ${hubot.variable} ${martian.variable} antialiased`}
         >
           <ThemeWrapper>
             <QueryProvider>
               <div className="flex min-h-screen">
                 <Sidebar />
-                <main className="flex-1 overflow-y-auto p-6 min-w-0 bg-white dark:bg-[#0A0C10] text-black dark:text-white">
+                <main className="flex-1 overflow-y-auto p-6 min-w-0 bg-background text-foreground">
                   {children}
                 </main>
               </div>

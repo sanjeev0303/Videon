@@ -1,16 +1,15 @@
-"use client";
-import * as React from "react";
+import React from "react";
 import LogoMark from "./logo-mark";
 
 type LogoProps = React.HTMLAttributes<HTMLDivElement> & {
-  /** Hide the wordmark, render only the mark (collapsed rails, footers). */
+  /** Hide the wordmark, render only the mark (footers, tight rails). */
   iconOnly?: boolean;
 };
 
 /**
  * Videon identity lockup — instrument mark + Bricolage wordmark.
- * Fully theme-adaptive: the whole lockup inherits currentColor (set the
- * wrapper's text color for light/dark), the mark's accents use --signal.
+ * Landing is ink-ground, always dark: the lockup is currentColor-driven
+ * so it inherits from the surrounding text color.
  */
 const Logo = React.forwardRef<HTMLDivElement, LogoProps>(
   ({ className = "", iconOnly = false, ...props }, ref) => (

@@ -5,50 +5,50 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import Image from "next/image";
+import Logo from "@/components/logo";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/5 bg-[#08090e]">
+    <footer className="border-t border-hairline">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="lg:col-span-1">
-            <Link href="#" className="flex items-center gap-1">
-              <Image src="/logos/logo.png" alt="Videon Logo" width={100} height={33} className="w-25 object-contain" />
+            <Link href="#" className="flex items-center gap-1 text-foreground">
+              <Logo />
             </Link>
             <p className="mt-2 text-xs text-muted-foreground">
               The developer platform for <br /> video production workloads.
             </p>
           </div>
 
-          <div className="flex gap-8 text-xs text-slate-500">
+          <div className="flex gap-8 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             <Link
               href="/docs"
               target="_blank"
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Docs
             </Link>
             <Link
               href="https://x.com/motionmesh"
               target="_blank"
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Twitter
             </Link>
             <Link
               href="https://github.com/sanjeev0303/videon"
               target="_blank"
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               GitHub
             </Link>
             <Link
               href="https://status.videon.com"
               target="_blank"
-              className="hover:text-slate-300 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Status
             </Link>
@@ -62,8 +62,7 @@ export default function Footer() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative flex h-2 w-2 cursor-pointer">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span className="tally-pulse absolute inline-flex h-full w-full rounded-full bg-signal"></span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -71,26 +70,26 @@ export default function Footer() {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <span className="text-xs text-slate-500">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
               All systems are operational now
             </span>
           </Link>
         </div>
 
-        <div className="mt-8 border-t border-slate-900 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[0.7rem] text-slate-600">
+        <div className="mt-8 border-t border-hairline pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[0.7rem] text-muted-foreground/70">
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
             <div>© {currentYear} Motionmesh Inc.</div>
-            <div className="hidden sm:block text-slate-800">•</div>
+            <div className="hidden sm:block text-muted-foreground/30">•</div>
             <div className="flex items-center gap-1">
-              Built with <span className="text-red-500 mx-1">❤️</span> for
+              Built with <span className="text-destructive mx-1">❤️</span> for
               developers
             </div>
           </div>
           <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-slate-400">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy
             </Link>
-            <Link href="/terms" className="hover:text-slate-400">
+            <Link href="/terms" className="hover:text-foreground transition-colors">
               Terms
             </Link>
           </div>

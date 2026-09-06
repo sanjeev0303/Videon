@@ -1,17 +1,21 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Hubot_Sans, Martian_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Script from "next/script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const hubot = Hubot_Sans({
+  variable: "--font-hubot",
+  subsets: ["latin"],
+});
+
+const martian = Martian_Mono({
+  variable: "--font-martian",
   subsets: ["latin"],
 });
 
@@ -30,7 +34,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-[#08090e] text-white antialiased`}
+          className={`${bricolage.variable} ${hubot.variable} ${martian.variable} min-h-screen bg-background text-foreground antialiased`}
         >
           {children}
 
@@ -39,13 +43,6 @@ export default function RootLayout({
             src="https://code.iconify.design/3/3.1.0/iconify.min.js"
             strategy="lazyOnload"
           />
-
-          {/* UnicornStudio for animated background */}
-          <Script id="unicorn-studio" strategy="lazyOnload">
-            {`
-            !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head||document.body).appendChild(i)}}();
-          `}
-          </Script>
 
           {/* Scroll animation observer */}
           <Script id="scroll-observer" strategy="lazyOnload">

@@ -1,38 +1,50 @@
 "use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import Logo from "@/components/logo";
 
 const Navbar = () => {
   const { isSignedIn, isLoaded } = useAuth();
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b border-white/5 bg-black/50 backdrop-blur-xl supports-backdrop-filter:bg-black/20">
+    <nav className="fixed top-0 left-0 right-0 z-50 w-full border-b border-hairline bg-ink/70 backdrop-blur-xl supports-backdrop-filter:bg-ink/50">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logos/logo.png" alt="Videon Logo" width={120} height={40} className="w-30 object-contain" />
+        <Link href="/" className="flex items-center gap-2 text-foreground">
+          <Logo />
         </Link>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-          <Link href="#story" className="hover:text-white transition-colors">
+        {/* Navigation Links — channel labels */}
+        <div className="hidden md:flex items-center gap-8 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <Link
+            href="#story"
+            className="relative py-1 transition-colors hover:text-foreground after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-signal after:transition-all after:duration-300 hover:after:w-full"
+          >
             Why us?
           </Link>
-          <Link href="#features" className="hover:text-white transition-colors">
+          <Link
+            href="#features"
+            className="relative py-1 transition-colors hover:text-foreground after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-signal after:transition-all after:duration-300 hover:after:w-full"
+          >
             Features
           </Link>
           <Link
             href="#how-it-works"
-            className="hover:text-white transition-colors"
+            className="relative py-1 transition-colors hover:text-foreground after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-signal after:transition-all after:duration-300 hover:after:w-full"
           >
             How it works
           </Link>
-          <Link href="#pricing" className="hover:text-white transition-colors">
+          <Link
+            href="#pricing"
+            className="relative py-1 transition-colors hover:text-foreground after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-signal after:transition-all after:duration-300 hover:after:w-full"
+          >
             Pricing
           </Link>
-          <Link href="/docs" className="hover:text-white transition-colors">
+          <Link
+            href="/docs"
+            className="relative py-1 transition-colors hover:text-foreground after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-0 after:bg-signal after:transition-all after:duration-300 hover:after:w-full"
+          >
             Docs
           </Link>
         </div>
@@ -43,7 +55,7 @@ const Navbar = () => {
             <Button
               size="sm"
               variant="ghost"
-              className="rounded-full cursor-pointer px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white"
+              className="cursor-pointer px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
             >
               ...
             </Button>
@@ -51,7 +63,7 @@ const Navbar = () => {
             <Link href="http://localhost:3001" target="_blank">
               <Button
                 size="sm"
-                className="rounded-full cursor-pointer bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20"
+                className="cursor-pointer bg-primary px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary-foreground hover:bg-primary/90"
               >
                 Dashboard
               </Button>
@@ -62,7 +74,7 @@ const Navbar = () => {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="rounded-full cursor-pointer px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white"
+                  className="cursor-pointer px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground"
                 >
                   Sign In
                 </Button>
@@ -70,7 +82,7 @@ const Navbar = () => {
               <Link href="/signup">
                 <Button
                   size="sm"
-                  className="rounded-full cursor-pointer bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-500 shadow-lg shadow-blue-500/20"
+                  className="cursor-pointer bg-primary px-5 py-2 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-primary-foreground hover:bg-primary/90"
                 >
                   Sign Up
                 </Button>

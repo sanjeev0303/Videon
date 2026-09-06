@@ -1,3 +1,4 @@
+import HowItWorksSection from "@/components/how-it-works";
 import FeaturesSection from "@/components/features";
 import Hero from "@/components/hero";
 import Navbar from "@/components/navbar";
@@ -12,6 +13,7 @@ export default function Page() {
       <Navbar />
       <Hero />
       <StorySection />
+      <HowItWorksSection />
       <FeaturesSection />
       <PricingSection />
       <CTASection />

@@ -34,15 +34,14 @@ import {
 } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { useUser, useAuth } from "@clerk/nextjs";
-import { VideonPlayer } from "@videon/player/react";
+import { VidmoxPlayer } from "@videon/player/react";
 
 // Stats are generated dynamically below
 
 const badgeClasses: Record<string, string> = {
-  blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
-  green: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400",
-  purple:
-    "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+  blue: "bg-signal/10 border border-signal/20 text-signal",
+  green: "bg-signal/10 border border-signal/20 text-signal",
+  purple: "bg-signal/10 border border-signal/20 text-signal",
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -89,11 +88,12 @@ export default function VideoDetailsPage() {
   const [copiedId, setCopiedId] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const axisColor = isDark ? "#6b7280" : "#9ca3af";
-  const gridColor = isDark ? "#1f2023" : "#e5e7eb";
-  const tooltipBg = isDark ? "#101217" : "#ffffff";
-  const tooltipBorder = isDark ? "#1f2023" : "#e5e7eb";
-  const tooltipText = isDark ? "#ffffff" : "#111827";
+  const axisColor = isDark ? "var(--muted-foreground)" : "var(--muted-foreground)";
+  const gridColor = "var(--hairline)";
+  const tooltipBg = "var(--card)";
+  const tooltipBorder = "var(--hairline)";
+  const tooltipText = "var(--foreground)";
+  const signalColor = "var(--signal)";
 
   const embedCode = `<iframe src="https://player.videon.com/embed/${videoId}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`;
 
@@ -127,13 +127,13 @@ export default function VideoDetailsPage() {
   };
 
   if (!isLoaded || isVideoLoading) return (
-    <div className="flex items-center justify-center h-64 text-gray-500">
+    <div className="flex items-center justify-center h-64 text-muted-foreground">
       Loading video details...
     </div>
   );
 
   if (!videoData) return (
-    <div className="flex items-center justify-center h-64 text-gray-500">
+    <div className="flex items-center justify-center h-64 text-muted-foreground">
       Video not found.
     </div>
   );
@@ -183,26 +183,26 @@ export default function VideoDetailsPage() {
   const topReferrers = getDeviceStats(videoData.analytics?.device || []);
 
   return (
-    <div className="text-black dark:text-white">
+    <div className="text-foreground">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link href="/" className="hover:underline">
+      <nav className="flex items-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-6">
+        <Link href="/" className="hover:text-foreground hover:underline">
           Dashboard
         </Link>
-        <ChevronRight size={16} className="mx-2" />
-        <Link href="/my-videos" className="hover:underline">
+        <ChevronRight size={14} className="mx-2 opacity-60" />
+        <Link href="/my-videos" className="hover:text-foreground hover:underline">
           My Videos
         </Link>
-        <ChevronRight size={16} className="mx-2" />
-        <span className="text-gray-700 dark:text-gray-300 font-medium">
+        <ChevronRight size={14} className="mx-2 opacity-60" />
+        <span className="text-foreground font-medium">
           Video Details
         </span>
       </nav>
 
       {/* Title */}
       <div className="space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold">{realVideo.title}</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="font-display text-2xl font-semibold">{realVideo.title}</h1>
+        <p className="text-sm text-muted-foreground">
           Video metadata, embed options, and performance analytics.
         </p>
       </div>
@@ -210,11 +210,11 @@ export default function VideoDetailsPage() {
       {/* Video Preview + Metadata */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Video Preview */}
-        <div className="lg:col-span-3 rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm overflow-hidden">
-          <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
+        <div className="lg:col-span-3 rounded-sm bg-card border border-hairline overflow-hidden">
+          <div className="relative aspect-video bg-black rounded-t-sm overflow-hidden">
             {isPlaying ? (
               <div className="w-full h-full">
-                <VideonPlayer videoTrackingId={videoData.videoTrackingId} autoPlay />
+                <VidmoxPlayer videoTrackingId={videoData.videoTrackingId} autoPlay />
               </div>
             ) : (
               <>
@@ -229,10 +229,10 @@ export default function VideoDetailsPage() {
                     className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer group"
                     onClick={() => setIsPlaying(true)}
                   >
-                    <div className="w-16 h-16 rounded-full bg-white/90 dark:bg-white/80 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div className="w-16 h-16 rounded-full bg-signal/90 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Play
                         size={28}
-                        className="text-gray-900 ml-1"
+                        className="text-background ml-1"
                         fill="currentColor"
                       />
                     </div>
@@ -240,7 +240,7 @@ export default function VideoDetailsPage() {
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60">
                     <p className="text-white font-medium mb-1">Video is processing...</p>
-                    <p className="text-gray-300 text-sm">Playback is unavailable.</p>
+                    <p className="text-white/60 text-sm">Playback is unavailable.</p>
                   </div>
                 )}
                 <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/70 rounded text-xs text-white font-medium pointer-events-none">
@@ -250,35 +250,35 @@ export default function VideoDetailsPage() {
             )}
           </div>
           <div className="p-5">
-            <h2 className="text-lg font-semibold mb-2">{realVideo.title}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            <h2 className="font-display text-lg font-semibold mb-2">{realVideo.title}</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {realVideo.description}
             </p>
           </div>
         </div>
 
         {/* Metadata Card */}
-        <div className="lg:col-span-2 rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
+        <div className="lg:col-span-2 rounded-sm bg-card border border-hairline p-5">
           <h3 className="text-sm font-semibold mb-4">Video Information</h3>
           <div className="space-y-4">
             {/* Video ID */}
             <div className="flex items-start gap-3">
               <FileText
                 size={16}
-                className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0"
+                className="text-muted-foreground mt-0.5 shrink-0"
               />
               <div className="min-w-0">
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   Video ID
                 </p>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{videoId}</p>
+                  <p className="text-sm font-medium font-mono text-xs truncate">{videoId}</p>
                   <button
                     onClick={handleCopyId}
-                    className="text-gray-400 hover:text-blue-500 transition shrink-0"
+                    className="text-muted-foreground hover:text-signal transition shrink-0"
                   >
                     {copiedId ? (
-                      <Check size={14} className="text-green-500" />
+                      <Check size={14} className="text-signal" />
                     ) : (
                       <Copy size={14} />
                     )}
@@ -291,13 +291,13 @@ export default function VideoDetailsPage() {
             <div className="flex items-start gap-3">
               <Globe
                 size={16}
-                className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0"
+                className="text-muted-foreground mt-0.5 shrink-0"
               />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   Status
                 </p>
-                <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400">
+                <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-sm bg-signal/10 border border-signal/20 text-signal">
                   {realVideo.status}
                 </span>
               </div>
@@ -307,10 +307,10 @@ export default function VideoDetailsPage() {
             <div className="flex items-start gap-3">
               <Calendar
                 size={16}
-                className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0"
+                className="text-muted-foreground mt-0.5 shrink-0"
               />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   Uploaded
                 </p>
                 <p className="text-sm font-medium">{realVideo.uploadedAt}</p>
@@ -321,13 +321,13 @@ export default function VideoDetailsPage() {
             <div className="flex items-start gap-3">
               <FolderOpen
                 size={16}
-                className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0"
+                className="text-muted-foreground mt-0.5 shrink-0"
               />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   Playlist
                 </p>
-                <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-sm bg-signal/10 border border-signal/20 text-signal">
                   {realVideo.playlist}
                 </span>
               </div>
@@ -337,42 +337,42 @@ export default function VideoDetailsPage() {
             <div className="flex items-start gap-3">
               <Tag
                 size={16}
-                className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0"
+                className="text-muted-foreground mt-0.5 shrink-0"
               />
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                <p className="text-xs text-muted-foreground mb-1">
                   Tags
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {realVideo.tags.length > 0 ? realVideo.tags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                      className="text-xs px-2 py-0.5 rounded-sm bg-muted border border-hairline text-muted-foreground"
                     >
                       {tag}
                     </span>
                   )) : (
-                    <span className="text-xs text-gray-400">No tags</span>
+                    <span className="text-xs text-muted-foreground">No tags</span>
                   )}
                 </div>
               </div>
             </div>
 
             {/* File Details */}
-            <div className="border-t border-gray-100 dark:border-gray-800 pt-4 mt-4">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            <div className="border-t border-hairline pt-4 mt-4">
+              <p className="text-xs text-muted-foreground mb-2">
                 File Details
               </p>
               <div className="grid grid-cols-2 gap-y-2 text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Format</span>
+                <span className="text-muted-foreground">Format</span>
                 <span className="font-medium">{realVideo.format}</span>
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-muted-foreground">
                   Resolution
                 </span>
                 <span className="font-medium">{realVideo.resolution}</span>
-                <span className="text-gray-500 dark:text-gray-400">Size</span>
+                <span className="text-muted-foreground">Size</span>
                 <span className="font-medium">{realVideo.fileSize}</span>
-                <span className="text-gray-500 dark:text-gray-400">
+                <span className="text-muted-foreground">
                   Duration
                 </span>
                 <span className="font-medium">{realVideo.duration}</span>
@@ -383,19 +383,19 @@ export default function VideoDetailsPage() {
       </div>
 
       {/* Embed Code */}
-      <div className="mt-6 rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
+      <div className="mt-6 rounded-sm bg-card border border-hairline p-5">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Code2 size={16} className="text-gray-500 dark:text-gray-400" />
+            <Code2 size={16} className="text-muted-foreground" />
             <h3 className="text-sm font-semibold">Embed Code</h3>
           </div>
           <button
             onClick={handleCopyEmbed}
-            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-sm border border-hairline text-foreground hover:bg-muted transition-colors"
           >
             {copiedEmbed ? (
               <>
-                <Check size={12} className="text-green-500" />
+                <Check size={12} className="text-signal" />
                 Copied!
               </>
             ) : (
@@ -406,7 +406,7 @@ export default function VideoDetailsPage() {
             )}
           </button>
         </div>
-        <div className="bg-gray-50 dark:bg-[#0a0c10] rounded-lg p-4 font-mono text-xs text-gray-600 dark:text-gray-400 overflow-x-auto">
+        <div className="bg-muted/40 rounded-sm p-4 font-mono text-xs text-muted-foreground overflow-x-auto border border-hairline">
           {embedCode}
         </div>
       </div>
@@ -416,20 +416,20 @@ export default function VideoDetailsPage() {
         {stats.map(({ label, value, icon: Icon, badge }) => (
           <div
             key={label}
-            className="rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5 flex flex-col gap-3"
+            className="rounded-sm bg-card border border-hairline p-5 flex flex-col gap-3"
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium text-muted-foreground">
                 {label}
               </p>
               <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeClasses[badge]}`}
+                className={`text-xs font-medium px-2 py-0.5 rounded-sm ${badgeClasses[badge]}`}
               >
                 <Icon size={12} className="inline mr-1" />
                 {label.split(" ")[0]}
               </span>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
+            <h2 className="font-display text-3xl font-bold text-foreground mt-2">
               {value}
             </h2>
           </div>
@@ -437,10 +437,10 @@ export default function VideoDetailsPage() {
       </div>
 
       {/* Views Over Time */}
-      <div className="mt-10 rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
+      <div className="mt-10 rounded-sm bg-card border border-hairline p-5">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">Views Over Time</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="font-display text-lg font-semibold">Views Over Time</h2>
+          <p className="text-sm text-muted-foreground">
             Daily views since upload
           </p>
         </div>
@@ -451,8 +451,8 @@ export default function VideoDetailsPage() {
           >
             <defs>
               <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="5%" stopColor={signalColor} stopOpacity={0.25} />
+                <stop offset="95%" stopColor={signalColor} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -476,7 +476,7 @@ export default function VideoDetailsPage() {
               contentStyle={{
                 backgroundColor: tooltipBg,
                 border: `1px solid ${tooltipBorder}`,
-                borderRadius: "8px",
+                borderRadius: "4px",
                 fontSize: "12px",
                 color: tooltipText,
               }}
@@ -485,21 +485,21 @@ export default function VideoDetailsPage() {
             <Area
               type="monotone"
               dataKey="views"
-              stroke="#3b82f6"
+              stroke={signalColor}
               strokeWidth={2}
               fill="url(#viewsGrad)"
               dot={false}
-              activeDot={{ r: 4, fill: "#3b82f6", stroke: "none" }}
+              activeDot={{ r: 4, fill: signalColor, stroke: "none" }}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
       {/* Top Referrers */}
-      <div className="mt-10 rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
+      <div className="mt-10 rounded-sm bg-card border border-hairline p-5">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">Top Referrers</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="font-display text-lg font-semibold">Top Referrers</h2>
+          <p className="text-sm text-muted-foreground">
             Where your viewers are coming from
           </p>
         </div>
@@ -533,7 +533,7 @@ export default function VideoDetailsPage() {
                 contentStyle={{
                   backgroundColor: tooltipBg,
                   border: `1px solid ${tooltipBorder}`,
-                  borderRadius: "8px",
+                  borderRadius: "4px",
                   fontSize: "12px",
                   color: tooltipText,
                 }}
@@ -541,17 +541,17 @@ export default function VideoDetailsPage() {
                   `${(value ?? 0).toLocaleString()} visits`,
                   "",
                 ]}
-                cursor={{ fill: isDark ? "#1c1f23" : "#f0f7ff" }}
+                cursor={{ fill: "var(--muted)" }}
               />
               <Bar
                 dataKey="visits"
-                fill="#3b82f6"
+                fill={signalColor}
                 radius={[0, 4, 4, 0]}
                 maxBarSize={20}
               />
             </BarChart>
           ) : (
-            <div className="flex items-center justify-center h-full text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
               No device data available yet.
             </div>
           )}

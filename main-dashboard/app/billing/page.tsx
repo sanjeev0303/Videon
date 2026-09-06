@@ -21,50 +21,48 @@ const Page = () => {
   }
 
   return (
-    <div className="text-black dark:dark:text-white">
+    <div className="text-foreground">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link href="/" className="hover:underline">
+      <nav className="flex items-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-6">
+        <Link href="/" className="hover:text-foreground hover:underline">
           Dashboard
         </Link>
-        <ChevronRight size={16} className="mx-2" />
-        <span className="text-gray-700 dark:text-gray-300 font-medium">
-          Billing
-        </span>
+        <ChevronRight size={14} className="mx-2 opacity-60" />
+        <span className="text-foreground font-medium">Billing</span>
       </nav>
 
       {/* Title */}
       <div className="space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold">Billing Settings</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+        <h1 className="font-display text-2xl font-semibold">Billing Settings</h1>
+        <p className="text-sm text-muted-foreground max-w-md">
           Track your current plan and manage subscription settings.
         </p>
       </div>
 
       {/* Manage Billing Card */}
-      <div className="flex items-center justify-between rounded-md p-5 mb-6 border border-gray-200 dark:border-[#1f2023] dark:bg-[#101217]">
+      <div className="flex items-center justify-between rounded-sm p-5 mb-6 border border-hairline bg-card">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20">
+          <div className="flex items-center justify-center w-10 h-10 rounded-sm bg-signal/10 border border-signal/20">
             <CreditCard
               size={20}
-              className="text-blue-600 dark:text-blue-400"
+              className="text-signal"
             />
           </div>
           <div>
             <h3 className="text-sm font-semibold">Manage Billing</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Manage your payment methods and billing details through Stripe.
             </p>
             {nextBillingDate && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Next billing date: <span className="font-medium text-gray-700 dark:text-gray-300">{formattedDate}</span>
+              <p className="text-xs text-muted-foreground mt-1">
+                Next billing date: <span className="font-medium text-foreground">{formattedDate}</span>
               </p>
             )}
           </div>
         </div>
         <button
           onClick={openPortal}
-          className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md border border-gray-300 dark:border-slate-800 hover:bg-gray-100 dark:hover:bg-slate-900/50 transition-colors"
+          className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-sm border border-hairline text-foreground hover:bg-muted transition-colors"
         >
           <ExternalLink size={14} />
           Open Stripe Portal
@@ -72,12 +70,12 @@ const Page = () => {
       </div>
 
       {/* Current Plan */}
-      <div className="dark:bg-[#101217] rounded-md p-5 mb-6 border border-gray-200 dark:border-[#1f2023]">
+      <div className="bg-card rounded-sm p-5 mb-6 border border-hairline">
         <div className="mb-4">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-2">
+          <h2 className="font-display text-xl font-bold text-foreground mb-2">
             Choose the Plan That Fits Your Needs
           </h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Upgrade to unlock more bandwidth, storage, and premium features like{" "}
             <br />
             custom watermark, ad-free player, and real-time support.
@@ -158,11 +156,11 @@ const Page = () => {
         </div>
       </div>
 
-      <div className="dark:bg-[#101217] rounded-md mb-6 p-5 border border-gray-200 dark:border-[#1f2023]">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">
+      <div className="bg-card rounded-sm mb-6 p-5 border border-hairline">
+        <h2 className="font-display text-lg font-semibold text-foreground mb-1">
           Add-ons
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+        <p className="text-sm text-muted-foreground mb-5">
           Extend your bandwidth and storage as your needs grow. Add flexibility
           with custom top-ups.
         </p>
@@ -185,11 +183,11 @@ const Page = () => {
           />
 
           {/* Custom Add-on Card */}
-          <div className="rounded-md border border-slate-300 dark:border-slate-800/50 p-4 bg-white dark:bg-slate-900">
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-white mb-2">
+          <div className="rounded-sm border border-hairline p-4 bg-card">
+            <h3 className="text-sm font-semibold text-foreground mb-2">
               Extra Playback Minutes
             </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+            <p className="text-xs text-muted-foreground mb-3">
               $5 = 2000 Minutes Playback Add as many Playback Minutes as you
               want.
             </p>
@@ -199,9 +197,9 @@ const Page = () => {
                 min={5}
                 step={5}
                 placeholder="Enter $ amount"
-                className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200"
+                className="px-3 py-1.5 text-sm rounded-sm border border-input bg-muted/40 text-foreground font-mono placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/50 outline-none"
               />
-              <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition">
+              <button className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium px-4 py-2 rounded-sm transition">
                 Add Playback Minutes
               </button>
             </div>
@@ -228,46 +226,46 @@ const Page = () => {
       </div>
 
       {/* Transaction History */}
-      <div className="dark:bg-[#101217] rounded-md p-5 border border-gray-200 dark:border-[#1f2023]">
-        <h3 className="text-sm font-medium dark:text-white mb-4">
+      <div className="bg-card rounded-sm p-5 border border-hairline">
+        <h3 className="text-sm font-medium text-foreground mb-4">
           Transaction History
         </h3>
         <table className="w-full text-sm text-left">
-          <thead className="text-xs uppercase text-gray-500 border-b border-gray-200 dark:border-slate-800">
+          <thead className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground border-b border-hairline">
             <tr>
-              <th className="py-2 font-medium">Date</th>
-              <th className="py-2 font-medium">Plan</th>
-              <th className="py-2 font-medium">Amount</th>
-              <th className="py-2 font-medium">Status</th>
-              <th className="py-2 font-medium">Invoice</th>
+              <th className="py-2 font-semibold">Date</th>
+              <th className="py-2 font-semibold">Plan</th>
+              <th className="py-2 font-semibold">Amount</th>
+              <th className="py-2 font-semibold">Status</th>
+              <th className="py-2 font-semibold">Invoice</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="py-4 text-center text-sm text-gray-500">
+                <td colSpan={5} className="py-4 text-center text-sm text-muted-foreground">
                   Loading invoices...
                 </td>
               </tr>
             ) : invoices.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-4 text-center text-sm text-gray-500">
+                <td colSpan={5} className="py-4 text-center text-sm text-muted-foreground">
                   No invoices found.
                 </td>
               </tr>
             ) : invoices.map((txn, idx) => (
               <tr
                 key={idx}
-                className="border-b border-gray-100 dark:border-[#1f2023] hover:bg-gray-100 dark:hover:bg-[#0e0f13] text-gray-700 dark:text-gray-300"
+                className="border-b border-hairline hover:bg-muted/50 transition-colors text-foreground"
               >
                 <td className="py-3">{new Date(txn.date).toLocaleDateString()}</td>
                 <td className="py-3">{txn.plan}</td>
-                <td className="py-3">{txn.amount / 100} {txn.currency?.toUpperCase() || 'USD'}</td>
+                <td className="py-3 font-mono text-xs">{txn.amount / 100} {txn.currency?.toUpperCase() || 'USD'}</td>
                 <td
-                  className={`py-3 font-medium ${
+                  className={`py-3 font-mono text-xs font-medium ${
                     txn.status?.toLowerCase() === "paid"
-                      ? "text-green-500"
-                      : "text-red-500"
+                      ? "text-signal"
+                      : "text-destructive"
                   }`}
                 >
                   {txn.status || 'Unknown'}
@@ -278,7 +276,7 @@ const Page = () => {
                       href={txn.hosted_invoice_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex cursor-pointer items-center gap-1 text-blue-500 hover:underline"
+                      className="inline-flex cursor-pointer items-center gap-1 text-signal hover:underline"
                     >
                       <Download className="w-4 h-4" />
                       Invoice

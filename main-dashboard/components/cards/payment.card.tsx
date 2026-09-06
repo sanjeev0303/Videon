@@ -26,24 +26,24 @@ export default function PaymentCard({
 }: PaymentCardProps) {
   return (
     <div
-      className={`relative rounded-md border p-5 transition hover:shadow-md cursor-pointer ${
+      className={`relative rounded-sm border p-5 transition hover:shadow-md cursor-pointer ${
         highlighted
-          ? "border-blue-700 bg-indigo-50 dark:bg-indigo-900/20"
-          : "border-slate-300 dark:border-slate-700"
+          ? "border-signal bg-signal/5"
+          : "border-hairline hover:border-muted-foreground/40"
       }`}
     >
       {/* Current Plan Badge */}
       {isCurrent && (
-        <span className="absolute top-2 right-2 text-xs font-medium bg-green-600 text-white px-2 py-0.5 rounded-full">
+        <span className="absolute top-2 right-2 font-mono text-[10px] uppercase tracking-[0.12em] font-medium bg-signal text-signal-foreground px-2 py-0.5 rounded-sm">
           Current Plan
         </span>
       )}
 
       {/* Title and Price */}
-      <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-1">
+      <h3 className="font-display text-lg font-semibold text-foreground mb-1">
         {name}
       </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+      <p className="text-sm text-muted-foreground mb-4">
         {isFree ? "Forever Free" : `${price}/month`}
       </p>
 
@@ -57,14 +57,14 @@ export default function PaymentCard({
               key={i}
               className={`flex items-center gap-2 ${
                 item.available === false
-                  ? "text-gray-400 line-through"
-                  : "text-gray-700 dark:text-gray-300"
+                  ? "text-muted-foreground line-through opacity-60"
+                  : "text-muted-foreground"
               }`}
             >
               {item.available === false ? (
-                <X className="w-4 h-4 text-red-400" />
+                <X className="w-4 h-4 text-destructive/70 shrink-0" />
               ) : (
-                <Check className="w-4 h-4 text-green-500" />
+                <Check className="w-4 h-4 text-signal shrink-0" />
               )}
               {item.label}
             </li>
@@ -76,7 +76,7 @@ export default function PaymentCard({
       {!isCurrent && (
         <button
           onClick={onClick}
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-md transition"
+          className="mt-6 w-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium py-2 rounded-sm transition"
         >
           Select Plan
         </button>

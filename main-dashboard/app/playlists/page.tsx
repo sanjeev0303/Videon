@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Plus, Edit3, Trash2, Loader2 } from "lucide-react";
+import { ChevronRight, Plus, Edit3, Trash2, Loader2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { usePlaylists } from "@/hooks/usePlaylists";
@@ -23,6 +23,9 @@ const timeAgo = (date: string | Date | null | undefined): string => {
   }
   return "just now";
 };
+
+const inputClasses =
+  "w-full px-3 py-2 text-sm rounded-sm bg-muted/40 border border-input outline-none transition-[border-color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring/50 text-foreground placeholder:text-muted-foreground";
 
 const Page = () => {
   const {
@@ -85,23 +88,21 @@ const Page = () => {
   };
 
   return (
-    <div className="text-black dark:text-white">
+    <div className="text-foreground">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link href="/" className="hover:underline">
+      <nav className="flex items-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-6">
+        <Link href="/" className="hover:text-foreground hover:underline">
           Dashboard
         </Link>
-        <ChevronRight size={16} className="mx-2" />
-        <span className="text-gray-700 dark:text-gray-300 font-medium">
-          Playlists
-        </span>
+        <ChevronRight size={14} className="mx-2 opacity-60" />
+        <span className="text-foreground font-medium">Playlists</span>
       </nav>
 
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold">My Playlists</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
+          <h1 className="font-display text-2xl font-semibold">My Playlists</h1>
+          <p className="text-sm text-muted-foreground max-w-md">
             Organize your videos into curated playlists.
           </p>
         </div>
@@ -111,79 +112,89 @@ const Page = () => {
             setDescription("");
             setShowModal(true);
           }}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition"
+          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-sm text-sm font-medium transition"
         >
           <Plus size={16} /> Create Playlist
         </button>
       </div>
 
       {/* Playlist Table */}
-      <div className="overflow-x-auto">
+      <div className="rounded-sm border border-hairline bg-card overflow-hidden">
         {isLoading ? (
-          <div className="flex justify-center items-center py-12 text-gray-500 dark:text-gray-400 gap-2">
+          <div className="flex justify-center items-center py-12 text-muted-foreground gap-2 font-mono text-sm">
             <Loader2 className="animate-spin" size={18} />
             Loading playlists...
           </div>
         ) : error ? (
-          <div className="text-center py-12 text-red-500">
+          <div className="text-center py-12 text-destructive text-sm">
             {(error as Error).message || "Failed to load playlists."}
           </div>
         ) : (
           <>
-            <table className="min-w-full text-sm">
-              <thead className="dark:bg-slate-900/50 border-b rounded-t dark:border-slate-900 text-gray-400 text-xs uppercase tracking-wider">
-                <tr>
-                  <th className="px-4 py-3 text-left">Playlist Name</th>
-                  <th className="px-4 py-3 text-left">Total Videos</th>
-                  <th className="px-4 py-3 text-left">Created At</th>
-                  <th className="px-4 py-3 text-left">Actions</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {playlists && playlists.map((pl: any) => (
-                  <tr
-                    key={pl.id}
-                    className="border-b dark:border-[#1f1f1f] hover:bg-gray-50 dark:hover:bg-[#1a1b1f]/50 transition"
-                  >
-                    <td className="px-4 py-4 font-medium">{pl.name}</td>
-                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400">
-                      {pl.totalVideos ?? 0}
-                    </td>
-                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400">
-                      {timeAgo(pl.created_at)}
-                    </td>
-                    <td className="px-4 py-4 flex gap-3">
-                      <button
-                        className="text-gray-400 hover:text-indigo-500 transition"
-                        title="Edit"
-                        onClick={() => {
-                          setPlaylist(pl);
-                          setPlaylistName(pl.name);
-                          setDescription(pl.description || "");
-                          setEditShowModal(true);
-                        }}
-                      >
-                        <Edit3 size={16} />
-                      </button>
-                      <button
-                        className="text-red-500 hover:text-red-600 transition"
-                        title="Delete"
-                        onClick={() => {
-                          setPlaylist(pl);
-                          setDeleteShowModal(true);
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm divide-y divide-hairline">
+                <thead className="bg-muted/40">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
+                      Playlist Name
+                    </th>
+                    <th className="px-4 py-3 text-left font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
+                      Total Videos
+                    </th>
+                    <th className="px-4 py-3 text-left font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
+                      Created At
+                    </th>
+                    <th className="px-4 py-3 text-left font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
+                      Actions
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody className="divide-y divide-hairline">
+                  {playlists && playlists.map((pl: any) => (
+                    <tr
+                      key={pl.id}
+                      className="hover:bg-muted/60 transition-colors"
+                    >
+                      <td className="px-4 py-4 font-medium text-foreground">{pl.name}</td>
+                      <td className="px-4 py-4 font-mono text-sm text-muted-foreground">
+                        {String(pl.totalVideos ?? 0).padStart(2, "0")}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-muted-foreground">
+                        {timeAgo(pl.created_at)}
+                      </td>
+                      <td className="px-4 py-4 flex gap-3">
+                        <button
+                          className="text-muted-foreground hover:text-signal transition-colors"
+                          title="Edit"
+                          onClick={() => {
+                            setPlaylist(pl);
+                            setPlaylistName(pl.name);
+                            setDescription(pl.description || "");
+                            setEditShowModal(true);
+                          }}
+                        >
+                          <Edit3 size={16} />
+                        </button>
+                        <button
+                          className="text-destructive hover:text-destructive/80 transition-colors"
+                          title="Delete"
+                          onClick={() => {
+                            setPlaylist(pl);
+                            setDeleteShowModal(true);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {(!playlists || playlists.length === 0) && (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-12 text-muted-foreground text-sm">
                 No playlists found.
               </div>
             )}
@@ -193,41 +204,41 @@ const Page = () => {
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50 px-4">
-          <div className="w-full max-w-md bg-gray-100 dark:bg-slate-900/50 text-white rounded-md shadow-lg border dark:border-slate-800/50">
-            <div className="px-6 pt-5 pb-4 border-b dark:border-slate-800/50">
-              <h2 className="text-xl font-semibold text-black dark:text-white">
+          <div className="w-full max-w-md bg-card text-foreground rounded-sm border border-hairline shadow-lg">
+            <div className="px-6 pt-5 pb-4 border-b border-hairline">
+              <h2 className="font-display text-lg font-semibold">
                 Create New Playlist
               </h2>
-              <p className="text-sm text-black/50 dark:text-gray-400 mt-1 leading-snug">
+              <p className="text-sm text-muted-foreground mt-1 leading-snug">
                 Playlists help you organize your videos internally. For example,
                 you might group English tutorials and Spanish videos separately.
                 These playlists are not visible to viewers.
               </p>
             </div>
 
-            <div className="px-6 py-4 space-y-5 text-sm text-black dark:text-gray-300">
+            <div className="px-6 py-4 space-y-5 text-sm">
               {/* Playlist Name */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                  Playlist Name <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium mb-1 text-foreground">
+                  Playlist Name <span className="text-destructive">*</span>
                 </label>
                 <input
                   value={playlistName}
                   onChange={(e) => setPlaylistName(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-md bg-gray-100 dark:bg-slate-900 border dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 text-black dark:text-white"
+                  className={inputClasses}
                   placeholder="e.g. English Tutorials"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium mb-1 text-black dark:text-white">
-                  Description <span className="text-gray-400">(optional)</span>
+                <label className="block text-sm font-medium mb-1 text-foreground">
+                  Description <span className="text-muted-foreground">(optional)</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3 py-2 text-sm rounded-md bg-gray-100 dark:bg-slate-900 border dark:border-slate-800 outline-none focus:ring-2 ring-indigo-500 text-black dark:text-white"
+                  className={`${inputClasses} min-h-24 resize-none`}
                   placeholder="Add an optional note for yourself"
                   rows={3}
                 />
@@ -238,14 +249,14 @@ const Page = () => {
             <div className="flex justify-end items-center gap-3 px-6 pb-5">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 cursor-pointer py-1.5 text-sm rounded-md border dark:border-slate-600 dark:text-gray-300 text-black dark:hover:bg-slate-700 hover:bg-gray-200 transition"
+                className="px-4 cursor-pointer py-1.5 text-sm rounded-sm border border-hairline text-foreground hover:bg-muted transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreate}
                 disabled={createPlaylistMutation.isPending}
-                className="px-4 cursor-pointer py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition disabled:opacity-50"
+                className="px-4 cursor-pointer py-1.5 text-sm rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition disabled:opacity-50"
               >
                 {createPlaylistMutation.isPending ? "Creating..." : "Create Playlist"}
               </button>
@@ -256,14 +267,14 @@ const Page = () => {
 
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-md dark:bg-slate-900/50 bg-gray-100 text-white rounded-md shadow-lg border dark:border-slate-900">
+          <div className="w-full max-w-md bg-card text-foreground rounded-sm border border-hairline shadow-lg">
             {/* Title */}
-            <div className="px-6 pt-5 pb-3 border-b dark:border-slate-900">
-              <h2 className="text-base font-semibold text-black dark:text-white">
+            <div className="px-6 pt-5 pb-3 border-b border-hairline">
+              <h2 className="font-display text-base font-semibold">
                 Edit Playlist
               </h2>
-              <p className="text-sm dark:text-gray-400 text-black/60 mt-1">
-                Update your playlist name or internal note. This won’t affect
+              <p className="text-sm text-muted-foreground mt-1">
+                Update your playlist name or internal note. This won&apos;t affect
                 your videos.
               </p>
             </div>
@@ -272,27 +283,27 @@ const Page = () => {
             {playlist && (
               <div className="px-6 py-4 space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-black dark:text-white">
+                  <label className="text-sm font-medium text-foreground">
                     Playlist Name *
                   </label>
                   <input
                     type="text"
                     value={playlistName}
                     onChange={(e) => setPlaylistName(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-md dark:bg-slate-900 border dark:border-slate-800 text-sm text-black dark:text-white"
+                    className={`mt-1 ${inputClasses}`}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-black dark:text-white">
+                  <label className="text-sm font-medium text-foreground">
                     Description{" "}
-                    <span className="text-black/60 dark:text-gray-400">
+                    <span className="text-muted-foreground">
                       (optional)
                     </span>
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 rounded-md bg-gray-100 dark:bg-slate-900 border dark:border-slate-800 text-sm text-black dark:text-white"
+                    className={`mt-1 ${inputClasses} min-h-24 resize-none`}
                     rows={3}
                   />
                 </div>
@@ -303,14 +314,14 @@ const Page = () => {
             <div className="flex justify-end items-center gap-3 px-6 pb-5">
               <button
                 onClick={() => setEditShowModal(false)}
-                className="cursor-pointer px-4 py-1.5 text-sm rounded-md border dark:border-slate-600 text-black dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
+                className="cursor-pointer px-4 py-1.5 text-sm rounded-sm border border-hairline text-foreground hover:bg-muted transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
                 disabled={updatePlaylistMutation.isPending}
-                className="cursor-pointer px-4 py-1.5 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold transition disabled:opacity-50"
+                className="cursor-pointer px-4 py-1.5 text-sm rounded-sm bg-primary hover:bg-primary/90 text-primary-foreground font-semibold transition disabled:opacity-50"
               >
                 {updatePlaylistMutation.isPending ? "Saving..." : "Save Changes"}
               </button>
@@ -321,21 +332,25 @@ const Page = () => {
 
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="w-full max-w-md dark:bg-slate-900 bg-gray-100 dark:text-white rounded-md shadow-lg border dark:border-slate-800">
+          <div className="w-full max-w-md bg-card text-foreground rounded-sm border border-hairline shadow-lg">
             {/* Title */}
-            <div className="px-6 pt-5 pb-3 border-b dark:border-slate-800">
-              <h2 className="text-base font-semibold">
+            <div className="px-6 pt-5 pb-3 border-b border-hairline">
+              <h2 className="font-display text-base font-semibold">
                 Confirm Playlist Deletion
               </h2>
             </div>
 
             {/* Body */}
-            <div className="px-6 py-4 text-sm dark:text-gray-300 space-y-3">
+            <div className="px-6 py-4 text-sm text-muted-foreground space-y-3">
               <div className="flex items-start gap-2">
-                <span className="text-yellow-400 text-lg">⚠️</span>
-                <p className="leading-relaxed text-black dark:text-gray-300">
-                  Are you sure you want to delete <strong className="text-red-400 font-semibold">{playlist?.name}</strong>? This playlist will be moved to a deleted state and will be{" "}
-                  <strong className="text-red-400 font-medium">
+                <AlertTriangle
+                  size={18}
+                  className="text-destructive shrink-0 mt-0.5"
+                />
+                <p className="leading-relaxed">
+                  Are you sure you want to delete{" "}
+                  <strong className="text-destructive font-semibold">{playlist?.name}</strong>? This playlist will be moved to a deleted state and will be{" "}
+                  <strong className="text-destructive font-medium">
                     permanently deleted after 24 hours
                   </strong>
                   . You won&apos;t be able to undo this action once the period
@@ -348,14 +363,14 @@ const Page = () => {
             <div className="flex justify-end items-center gap-3 px-6 pb-5">
               <button
                 onClick={() => setDeleteShowModal(false)}
-                className="cursor-pointer px-4 py-1.5 text-sm rounded-md border dark:border-slate-600 dark:text-gray-300 dark:hover:bg-slate-700 transition hover:bg-gray-200"
+                className="cursor-pointer px-4 py-1.5 text-sm rounded-sm border border-hairline text-foreground hover:bg-muted transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
                 disabled={deletePlaylistMutation.isPending}
-                className="cursor-pointer px-4 py-1.5 text-sm rounded-md bg-red-600 hover:bg-red-700 text-white font-semibold transition disabled:opacity-50"
+                className="cursor-pointer px-4 py-1.5 text-sm rounded-sm bg-destructive hover:bg-destructive/90 text-white font-semibold transition disabled:opacity-50"
               >
                 {deletePlaylistMutation.isPending ? "Deleting..." : "Confirm Delete"}
               </button>

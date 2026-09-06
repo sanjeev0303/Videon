@@ -23,14 +23,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMainAnalytics } from "../../hooks/useMainAnalytics";
 import { useAnalytics } from "../../hooks/useAnalytics";
 
-// ── Mock Data for missing backend pieces ────────────────────────────────────────────────────────────────
-
-const DEVICE_COLORS: Record<string, string> = {
-  Desktop: "#3b82f6",
-  Mobile: "#10b981",
-  Tablet: "#a855f7",
-  Other: "#f59e0b",
-};
+// ── Mock Data for missing backend pieces ────────────────────────────────────────────────
 
 const browserData = [
   { browser: "Chrome", share: 61 },
@@ -38,13 +31,6 @@ const browserData = [
   { browser: "Firefox", share: 10 },
   { browser: "Edge", share: 8 },
 ];
-
-const badgeClasses: Record<string, string> = {
-  blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
-  green: "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400",
-  purple:
-    "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
-};
 
 const rangeLabels = {
   "7d": "Last 7 Days",
@@ -80,16 +66,21 @@ export default function AnalyticsPage() {
   const { data: mainAnalytics, isLoading } = mainAnalyticsQuery;
   const { data: globalAnalytics } = analyticsQuery;
 
-  const deviceData = (mainAnalytics?.deviceBreakdown ?? []).map(d => ({
+  // Only saturated accent is signal; the rest read as quiet ink / signal mist, never blue/purple.
+  const signal = isDark ? "#3BE39F" : "#15875A";
+  const deviceData = (mainAnalytics?.deviceBreakdown ?? []).map((d, i) => ({
     ...d,
-    color: DEVICE_COLORS[d.name] ?? "#6b7280",
+    color: isDark
+      ? ["#3BE39F", "oklch(0.84 0.19 156 / 0.5)", "oklch(0.84 0.19 156 / 0.28)", "oklch(1 0 0 / 0.14)"][i % 4]
+      : ["#15875A", "oklch(0.55 0.15 156 / 0.5)", "oklch(0.55 0.15 156 / 0.28)", "oklch(0.145 0.012 85 / 0.14)"][i % 4],
   }));
 
-  const axisColor = isDark ? "#6b7280" : "#9ca3af";
-  const gridColor = isDark ? "#1f2023" : "#e5e7eb";
-  const tooltipBg = isDark ? "#101217" : "#ffffff";
-  const tooltipBorder = isDark ? "#1f2023" : "#e5e7eb";
-  const tooltipText = isDark ? "#ffffff" : "#111827";
+  const axisColor = isDark ? "oklch(1 0 0 / 0.40)" : "oklch(0.145 0.012 85 / 0.45)";
+  const gridColor = isDark ? "oklch(1 0 0 / 0.06)" : "oklch(0.145 0.012 85 / 0.08)";
+  const tooltipBg = isDark ? "oklch(0.16 0.01 85 / 0.95)" : "oklch(0.98 0.005 85 / 0.97)";
+  const tooltipBorder = isDark ? "oklch(1 0 0 / 0.1)" : "oklch(0.145 0.012 85 / 0.14)";
+  const tooltipText = isDark ? "#ffffff" : "#16130f";
+  const hoverFill = isDark ? "oklch(1 0 0 / 0.03)" : "oklch(0.145 0.012 85 / 0.03)";
 
   if (!isLoaded) return null;
 
@@ -100,7 +91,6 @@ export default function AnalyticsPage() {
       change: `${(mainAnalytics?.overview?.totalViewsChangePct || 0) > 0 ? "+" : ""}${mainAnalytics?.overview?.totalViewsChangePct || 0}%`,
       positive: (mainAnalytics?.overview?.totalViewsChangePct || 0) >= 0,
       icon: Eye,
-      badge: "blue" as const,
     },
     {
       label: "Watch Time",
@@ -108,7 +98,6 @@ export default function AnalyticsPage() {
       change: "", // Not returned yet
       positive: true,
       icon: Clock,
-      badge: "green" as const,
     },
     {
       label: "Unique Viewers",
@@ -116,7 +105,6 @@ export default function AnalyticsPage() {
       change: "", // Not returned yet
       positive: true,
       icon: Users,
-      badge: "purple" as const,
     },
     {
       label: "Avg Duration",
@@ -124,42 +112,39 @@ export default function AnalyticsPage() {
       change: "", // Not returned yet
       positive: true,
       icon: TrendingUp,
-      badge: "blue" as const,
     },
   ];
 
   return (
-    <div className="text-black dark:text-white">
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link href="/" className="hover:underline">
+    <div className="text-foreground">
+      {/* Breadcrumb — mono instrument path */}
+      <nav className="flex items-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-6">
+        <Link href="/" className="hover:text-foreground hover:underline">
           Dashboard
         </Link>
-        <ChevronRight size={16} className="mx-2" />
-        <span className="text-gray-700 dark:text-gray-300 font-medium">
-          Analytics
-        </span>
+        <ChevronRight size={14} className="mx-2 opacity-60" />
+        <span className="text-foreground font-medium">Analytics</span>
       </nav>
 
       {/* Title */}
       <div className="space-y-1 mb-6">
-        <h1 className="text-2xl font-semibold">Analytics</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <h1 className="font-display text-2xl font-semibold">Analytics</h1>
+        <p className="text-sm text-muted-foreground">
           Track views, engagement, and audience insights across your video
           library.
         </p>
       </div>
 
-      {/* Date Range Selector */}
+      {/* Date Range Selector — segmented control */}
       <div className="flex items-center gap-2 mb-8">
         {(["7d", "14d", "30d"] as const).map((r) => (
           <button
             key={r}
             onClick={() => setRange(r)}
-            className={`cursor-pointer px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${
+            className={`cursor-pointer px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] rounded-sm border transition-colors ${
               range === r
-                ? "bg-blue-600 border-blue-600 text-white"
-                : "bg-white dark:bg-[#101217] border-gray-200 dark:border-[#1f2023] text-gray-600 dark:text-gray-400 hover:border-blue-400 dark:hover:border-blue-600"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card border-hairline text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
             {rangeLabels[r]}
@@ -170,28 +155,23 @@ export default function AnalyticsPage() {
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {overviewStats.map(
-          ({ label, value, change, positive, icon: Icon, badge }) => (
+          ({ label, value, change, positive, icon: Icon }) => (
             <div
               key={label}
-              className="rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5 flex flex-col gap-3"
+              className="rounded-sm bg-card border border-hairline p-5 flex flex-col gap-3"
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                   {label}
                 </p>
-                <span
-                  className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeClasses[badge]}`}
-                >
-                  <Icon size={12} className="inline mr-1" />
-                  {label.split(" ")[0]}
-                </span>
+                <Icon size={14} className="text-signal shrink-0" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h2 className="font-mono text-3xl font-semibold text-foreground">
                 {value}
               </h2>
               {change && (
                 <p
-                  className={`text-xs font-medium ${positive ? "text-green-500" : "text-red-400"}`}
+                  className={`font-mono text-[11px] uppercase tracking-[0.12em] ${positive ? "text-signal" : "text-destructive"}`}
                 >
                   {change} vs last period
                 </p>
@@ -202,10 +182,10 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Views Over Time — Area Chart */}
-      <div className="mt-10 rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
+      <div className="mt-10 rounded-sm bg-card border border-hairline p-5">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">Views Over Time</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <h2 className="font-display text-lg font-semibold">Views Over Time</h2>
+          <p className="text-sm text-muted-foreground">
             Daily views for the {rangeLabels[range].toLowerCase()}
           </p>
         </div>
@@ -216,8 +196,8 @@ export default function AnalyticsPage() {
           >
             <defs>
               <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="5%" stopColor={signal} stopOpacity={0.25} />
+                <stop offset="95%" stopColor={signal} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid
@@ -241,7 +221,7 @@ export default function AnalyticsPage() {
               contentStyle={{
                 backgroundColor: tooltipBg,
                 border: `1px solid ${tooltipBorder}`,
-                borderRadius: "8px",
+                borderRadius: "4px",
                 fontSize: "12px",
                 color: tooltipText,
               }}
@@ -250,11 +230,11 @@ export default function AnalyticsPage() {
             <Area
               type="monotone"
               dataKey="views"
-              stroke="#3b82f6"
+              stroke={signal}
               strokeWidth={2}
               fill="url(#viewsGradient)"
               dot={false}
-              activeDot={{ r: 4, fill: "#3b82f6", stroke: "none" }}
+              activeDot={{ r: 4, fill: signal, stroke: "none" }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -262,57 +242,57 @@ export default function AnalyticsPage() {
 
       {/* Top Videos Table */}
       <div className="mt-10">
-        <h2 className="text-lg font-semibold mb-1">Top Videos</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <h2 className="font-display text-lg font-semibold mb-1">Top Videos</h2>
+        <p className="text-sm text-muted-foreground mb-4">
           Best performing videos in the selected period.
         </p>
-        <div className="rounded-xl border border-gray-200 dark:border-[#1f2023] bg-white dark:bg-[#101217] shadow-sm overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-800">
+        <div className="rounded-sm border border-hairline bg-card overflow-hidden">
+          <table className="min-w-full divide-y divide-hairline">
             <thead>
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">
+                <th className="px-5 py-3 text-left font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
                   #
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">
+                <th className="px-5 py-3 text-left font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
                   Video Title
                 </th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">
+                <th className="px-5 py-3 text-right font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
                   Views
                 </th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">
+                <th className="px-5 py-3 text-right font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
                   Watch Time
                 </th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 tracking-wide uppercase">
+                <th className="px-5 py-3 text-right font-mono text-[10px] font-semibold text-muted-foreground tracking-[0.18em] uppercase">
                   Avg Duration
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <tbody className="divide-y divide-hairline">
               {mainAnalytics?.topVideos?.map((row, index) => (
                 <tr
                   key={index}
-                  className="group hover:bg-blue-50 dark:hover:bg-[#1c1f23] transition-colors"
+                  className="group hover:bg-muted transition-colors"
                 >
-                  <td className="px-5 py-3 text-sm font-bold text-gray-400 dark:text-gray-500">
-                    {["🥇", "🥈", "🥉"][index] ?? index + 1}
+                  <td className="px-5 py-3 font-mono text-sm text-muted-foreground">
+                    {String(index + 1).padStart(2, "0")}
                   </td>
-                  <td className="px-5 py-3 text-sm font-medium text-gray-700 dark:text-gray-200">
+                  <td className="px-5 py-3 text-sm font-medium text-foreground">
                     {row.title}
                   </td>
-                  <td className="px-5 py-3 text-right text-sm font-semibold text-blue-600 dark:text-blue-400">
+                  <td className="px-5 py-3 text-right font-mono font-semibold text-signal">
                     {row.views.toLocaleString()}
                   </td>
-                  <td className="px-5 py-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-5 py-3 text-right font-mono text-sm text-muted-foreground">
                     {formatWatchTime(row.watchTimeSeconds || 0)}
                   </td>
-                  <td className="px-5 py-3 text-right text-sm text-gray-500 dark:text-gray-400">
+                  <td className="px-5 py-3 text-right font-mono text-sm text-muted-foreground">
                     {formatAvgDuration(row.avgDurationSeconds || 0)}
                   </td>
                 </tr>
               ))}
               {(!mainAnalytics?.topVideos || mainAnalytics.topVideos.length === 0) && (
                 <tr>
-                  <td colSpan={5} className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                  <td colSpan={5} className="text-center py-4 text-sm text-muted-foreground">
                     No videos found in this period.
                   </td>
                 </tr>
@@ -325,14 +305,14 @@ export default function AnalyticsPage() {
       {/* Device & Browser Breakdown */}
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Device Breakdown — Donut Chart */}
-        <div className="rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
-          <h2 className="text-lg font-semibold mb-1">Device Breakdown</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <div className="rounded-sm bg-card border border-hairline p-5">
+          <h2 className="font-display text-lg font-semibold mb-1">Device Breakdown</h2>
+          <p className="text-sm text-muted-foreground mb-4">
             Share by device type
           </p>
           <div className="flex items-center gap-6">
             {deviceData.length === 0 ? (
-              <p className="text-sm text-gray-400 dark:text-gray-500 py-8 text-center w-full">No device data yet.</p>
+              <p className="text-sm text-muted-foreground py-8 text-center w-full">No device data yet.</p>
             ) : (
               <>
                 <ResponsiveContainer width={180} height={180}>
@@ -354,7 +334,7 @@ export default function AnalyticsPage() {
                       contentStyle={{
                         backgroundColor: tooltipBg,
                         border: `1px solid ${tooltipBorder}`,
-                        borderRadius: "8px",
+                        borderRadius: "4px",
                         fontSize: "12px",
                         color: tooltipText,
                       }}
@@ -369,13 +349,13 @@ export default function AnalyticsPage() {
                   {deviceData.map(({ name, value, color }) => (
                     <div key={name} className="flex items-center gap-2">
                       <div
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        className="w-2.5 h-2.5 rounded-sm shrink-0"
                         style={{ backgroundColor: color }}
                       />
-                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                      <span className="text-sm text-muted-foreground">
                         {name}
                       </span>
-                      <span className="ml-auto text-sm font-semibold text-gray-800 dark:text-white pl-4">
+                      <span className="ml-auto text-sm font-mono font-semibold text-foreground pl-4">
                         {value}%
                       </span>
                     </div>
@@ -387,9 +367,9 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Browser Breakdown — Horizontal Bar */}
-        <div className="rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5">
-          <h2 className="text-lg font-semibold mb-1">Browser Breakdown</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <div className="rounded-sm bg-card border border-hairline p-5">
+          <h2 className="font-display text-lg font-semibold mb-1">Browser Breakdown</h2>
+          <p className="text-sm text-muted-foreground mb-4">
             Share by browser
           </p>
           <ResponsiveContainer width="100%" height={180}>
@@ -423,7 +403,7 @@ export default function AnalyticsPage() {
                 contentStyle={{
                   backgroundColor: tooltipBg,
                   border: `1px solid ${tooltipBorder}`,
-                  borderRadius: "8px",
+                  borderRadius: "4px",
                   fontSize: "12px",
                   color: tooltipText,
                 }}
@@ -431,12 +411,12 @@ export default function AnalyticsPage() {
                   `${value ?? 0}%`,
                   "Share",
                 ]}
-                cursor={{ fill: isDark ? "#1c1f23" : "#f0f7ff" }}
+                cursor={{ fill: hoverFill }}
               />
               <Bar
                 dataKey="share"
-                fill="#3b82f6"
-                radius={[0, 4, 4, 0]}
+                fill={signal}
+                fillOpacity={0.85}
                 maxBarSize={20}
               />
             </BarChart>
@@ -446,11 +426,11 @@ export default function AnalyticsPage() {
 
       {/* Geographic Distribution */}
       <div className="mt-10">
-        <h2 className="text-lg font-semibold mb-1">Geographic Distribution</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <h2 className="font-display text-lg font-semibold mb-1">Geographic Distribution</h2>
+        <p className="text-sm text-muted-foreground mb-4">
           Viewer locations based on the last 28 days of data.
         </p>
-        <div className="rounded-xl bg-white dark:bg-[#101217] border border-gray-200 dark:border-[#1f2023] shadow-sm p-5 overflow-hidden">
+        <div className="rounded-sm bg-card border border-hairline p-5 overflow-hidden">
           <GeographicalMap data={globalAnalytics?.visitorCountries || []} />
         </div>
       </div>

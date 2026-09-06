@@ -3,8 +3,12 @@
 import React, { useState } from "react";
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "next-themes";
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
+const SIGNAL_DARK = "#3BE39F";
+const SIGNAL_LIGHT = "#15875A";
 
 interface GeographicalMapProps {
   data?: { country: string; views: number }[];
@@ -18,6 +22,14 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({ data = [] }) => {
 
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme ? resolvedTheme === "dark" : true;
+  // Only saturated accent is signal; absence reads as quiet ink, never slate/blue.
+  const signal = isDark ? SIGNAL_DARK : SIGNAL_LIGHT;
+  const inkQuiet = isDark ? "oklch(0.32 0.012 85 / 0.55)" : "oklch(0.50 0.02 85 / 0.30)";
+  const inkActive = isDark ? "oklch(0.42 0.014 85 / 0.75)" : "oklch(0.50 0.02 85 / 0.55)";
+  const hairline = isDark ? "oklch(1 0 0 / 0.10)" : "oklch(0.12 0.01 85 / 0.12)";
+
   const getCountryNameFromCode = (code: string) => {
     try {
       const name = new Intl.DisplayNames(["en"], { type: "region" }).of(code);
@@ -28,11 +40,12 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({ data = [] }) => {
     }
   };
 
-  const getColor = (countryName: string) => {
-    const match = data.find((c) => getCountryNameFromCode(c.country) === countryName || c.country === countryName);
-    if (!match) return "#1e293b";
-    return "oklch(62.3% 0.214 259.815)";
-  };
+  const findMatch = (countryName: string) =>
+    data.find(
+      (c) =>
+        getCountryNameFromCode(c.country) === countryName ||
+        c.country === countryName
+    );
 
   return (
     <div className="relative w-full -ml-[5%] px-0 py-5 overflow-visible">
@@ -56,8 +69,7 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({ data = [] }) => {
           {({ geographies }) =>
             geographies.map((geo) => {
               const countryName = geo.properties.name;
-              const match = data.find((c) => getCountryNameFromCode(c.country) === countryName || c.country === countryName);
-              const baseColor = getColor(countryName);
+              const match = findMatch(countryName);
 
               return (
                 <Geography
@@ -74,19 +86,22 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({ data = [] }) => {
                     setTooltipPosition({ x: e.pageX, y: e.pageY });
                   }}
                   onMouseLeave={() => setHovered(null)}
-                  fill={baseColor}
-                  stroke="#334155"
+                  fill={match ? signal : inkQuiet}
+                  stroke={hairline}
                   style={{
                     default: {
                       outline: "none",
                       transition: "fill 0.3s ease-in-out",
                     },
                     hover: {
-                      fill: match ? baseColor : "#facc15",
+                      fill: match ? signal : inkActive,
                       outline: "none",
                       transition: "fill 0.3s ease-in-out",
                     },
-                    pressed: { fill: "#ef4444", outline: "none" },
+                    pressed: {
+                      fill: match ? signal : inkActive,
+                      outline: "none",
+                    },
                   }}
                 />
               );
@@ -104,7 +119,7 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({ data = [] }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="fixed bg-gray-800 text-white text-xs p-2 rounded! shadow-lg pointer-events-none z-9999"
+            className="fixed bg-popover text-popover-foreground text-xs p-2 rounded-sm border border-hairline shadow-lg pointer-events-none z-9999"
             style={{
               top: tooltipPosition.y,
               left: tooltipPosition.x,
@@ -112,7 +127,7 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({ data = [] }) => {
           >
             <strong>{hovered.name}</strong>
             <br />
-            Visitors: <span className="text-green-400">{hovered.visitors}</span>
+            Visitors: <span className="text-signal">{hovered.visitors}</span>
           </motion.div>
         )}
       </AnimatePresence>

@@ -13,7 +13,7 @@ const Page = () => {
   const isProUser = settings?.canCustomize ?? false;
 
   if (isLoading) {
-    return <div className="flex items-center justify-center min-h-[400px] text-gray-500">Loading...</div>;
+    return <div className="flex items-center justify-center min-h-[400px] text-muted-foreground">Loading...</div>;
   }
   const [enabled, setEnabled] = useState(true);
   const [position, setPosition] = useState("bottom-right");
@@ -44,43 +44,43 @@ const Page = () => {
   };
 
   return (
-    <div className="text-black dark:text-white">
+    <div className="text-foreground">
       {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link href="/" className="hover:underline">
+      <nav className="flex items-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-6">
+        <Link href="/" className="hover:text-foreground hover:underline">
           Dashboard
         </Link>
-        <ChevronRight className="mx-2" size={16} />
-        <span className="text-gray-700 dark:text-gray-300 font-medium">
+        <ChevronRight className="mx-2 opacity-60" size={14} />
+        <span className="text-foreground font-medium">
           Watermark & Branding
         </span>
       </nav>
 
       {/* Header */}
       <div className="space-y-1 mb-8">
-        <h1 className="text-2xl font-semibold">Watermark & Branding</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 max-w-125">
+        <h1 className="font-display text-2xl font-semibold">Watermark & Branding</h1>
+        <p className="text-sm text-muted-foreground max-w-125">
           Personalize your videos by uploading a custom watermark and
           configuring its appearance.
         </p>
       </div>
 
-      <div className="bg-white dark:bg-slate-900/50 rounded-md p-6 border border-slate-200 dark:border-slate-900 max-w-3xl space-y-6">
+      <div className="bg-card rounded-sm p-6 border border-hairline max-w-3xl space-y-6">
         {/* Enable/Disable */}
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-sm font-semibold">Watermark Visibility</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               The Videon watermark will be applied by default for free users.
             </p>
           </div>
           <button
             onClick={() => setEnabled(!enabled)}
             disabled={!isProUser}
-            className={`px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 ${
+            className={`px-3 py-1.5 rounded-sm text-sm font-medium flex items-center gap-2 disabled:opacity-50 ${
               enabled
-                ? "bg-green-600 text-white"
-                : "bg-slate-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300"
+                ? "bg-signal text-signal-foreground"
+                : "bg-muted text-muted-foreground"
             }`}
           >
             {enabled ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -89,8 +89,8 @@ const Page = () => {
         </div>
 
         {/* Preview */}
-        <div className="bg-slate-100 dark:bg-slate-800/50 p-4 rounded-md flex items-center justify-between">
-          <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+        <div className="bg-muted/40 border border-hairline p-4 rounded-sm flex items-center justify-between">
+          <div className="text-sm text-foreground font-medium">
             {isProUser
               ? "Current Watermark Preview"
               : "Videon Watermark (Default)"}
@@ -129,7 +129,7 @@ const Page = () => {
               type="file"
               accept="image/png,image/svg+xml"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
-              className="block text-sm text-gray-600 dark:text-gray-400"
+              className="block text-sm text-muted-foreground"
             />
           </div>
 
@@ -141,7 +141,7 @@ const Page = () => {
             <select
               value={position}
               onChange={(e) => setPosition(e.target.value)}
-              className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-md px-3 py-2 text-sm"
+              className="w-full bg-muted/40 border border-input rounded-sm px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             >
               <option value="top-left">Top Left</option>
               <option value="top-right">Top Right</option>
@@ -162,19 +162,19 @@ const Page = () => {
               max={100}
               value={opacity}
               onChange={(e) => setOpacity(Number(e.target.value))}
-              className="w-full"
+              className="w-full accent-signal"
             />
           </div>
         </div>
 
         {/* Pro Prompt */}
         {!isProUser && (
-          <div className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 p-4 rounded-md flex items-center justify-between">
+          <div className="bg-signal/5 border border-signal/20 text-signal p-4 rounded-sm flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Crown size={16} />
               Upgrade to Pro to customize your watermark and branding.
             </div>
-            <button className="text-sm font-semibold text-blue-500 cursor-pointer hover:underline">
+            <button className="text-sm font-semibold text-signal cursor-pointer hover:underline">
               Upgrade
             </button>
           </div>
@@ -183,12 +183,12 @@ const Page = () => {
         {/* Save Button */}
         {isProUser && (
           <div className="flex justify-end items-center gap-4">
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            {uploadError && <p className="text-red-500 text-sm">{uploadError}</p>}
+            {error && <p className="text-destructive text-sm">{error}</p>}
+            {uploadError && <p className="text-destructive text-sm">{uploadError}</p>}
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-5 py-2 text-sm rounded-md bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium transition"
+              className="px-5 py-2 text-sm rounded-sm bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium transition"
             >
               {isSaving ? "Saving..." : "Save Changes"}
             </button>

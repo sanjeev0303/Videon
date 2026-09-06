@@ -3,6 +3,7 @@ import { ChevronRight, CircleUser, ShieldCheck } from "lucide-react";
 import { UserProfile } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { dark } from "@clerk/themes";
+import { Button } from "@/components/ui/button";
 
 const SecuritySection = () => {
   const { resolvedTheme } = useTheme();
@@ -23,17 +24,17 @@ const SecuritySection = () => {
           onClick={() => toggleSection("manage")}
         >
           <div className="flex items-start gap-3">
-            <CircleUser size={22} className="text-indigo-500 mt-1" />
+            <CircleUser size={22} className="text-signal mt-1" />
             <div>
               <div className="text-base font-medium">Manage Account</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Change your current account password.
               </p>
             </div>
           </div>
           <ChevronRight
             size={16}
-            className={`text-gray-500 transition-transform ${openSection === "manage" ? "rotate-90" : ""
+            className={`text-muted-foreground transition-transform ${openSection === "manage" ? "rotate-90" : ""
               }`}
           />
         </div>
@@ -46,10 +47,10 @@ const SecuritySection = () => {
           onClick={() => toggleSection("domains")}
         >
           <div className="flex items-start gap-3">
-            <ShieldCheck size={22} className="text-green-500 mt-1" />
+            <ShieldCheck size={22} className="text-signal mt-1" />
             <div>
               <div className="text-base font-medium">Whitelisted Domains</div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 Only allow video plays from specific domains to prevent
                 unauthorized access.
               </p>
@@ -57,7 +58,7 @@ const SecuritySection = () => {
           </div>
           <ChevronRight
             size={16}
-            className={`text-gray-500 transition-transform ${openSection === "domains" ? "rotate-90" : ""
+            className={`text-muted-foreground transition-transform ${openSection === "domains" ? "rotate-90" : ""
               }`}
           />
         </div>
@@ -72,7 +73,7 @@ const SecuritySection = () => {
                 appearance={{
                   baseTheme: resolvedTheme === "dark" ? dark : undefined,
                   elements: {
-                    card: "shadow-xl border border-gray-200 dark:border-gray-800",
+                    card: "shadow-xl border border-hairline",
                     navbar: "hidden",
                     navbarMobileMenuButton: "hidden",
                     headerTitle: "hidden",
@@ -85,27 +86,27 @@ const SecuritySection = () => {
         )}
 
         {openSection === "domains" && (
-          <div className="border-t border-slate-700 px-4 py-4 space-y-4">
+          <div className="border-t border-hairline px-4 py-4 space-y-4">
             <input
               type="text"
               placeholder="e.g. mywebsite.com"
-              className="w-full px-3 py-2 rounded bg-slate-800/50 border border-slate-700 text-sm"
+              className="w-full px-3 py-2 rounded-sm bg-card border border-hairline text-sm"
             />
-            <button className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-sm px-4 py-2 rounded text-white">
+            <Button variant="default" className="cursor-pointer text-sm" type="button">
               Add Domain
-            </button>
+            </Button>
 
             {/* Placeholder for domain list */}
             <div className="pt-4 space-y-2 text-sm">
-              <div className="flex justify-between items-center border border-slate-800 px-3 py-2 rounded">
-                <span className="text-white">example.com</span>
-                <button className="text-red-400 cursor-pointer hover:underline text-xs">
+              <div className="flex justify-between items-center border border-hairline px-3 py-2 rounded-sm">
+                <span className="text-foreground">example.com</span>
+                <button className="text-destructive cursor-pointer hover:underline text-xs">
                   Remove
                 </button>
               </div>
-              <div className="flex justify-between items-center border border-slate-800 px-3 py-2 rounded">
-                <span className="text-white">videon.dev</span>
-                <button className="text-red-400 hover:underline cursor-pointer text-xs">
+              <div className="flex justify-between items-center border border-hairline px-3 py-2 rounded-sm">
+                <span className="text-foreground">videon.dev</span>
+                <button className="text-destructive hover:underline cursor-pointer text-xs">
                   Remove
                 </button>
               </div>
