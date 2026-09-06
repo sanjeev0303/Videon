@@ -11,15 +11,19 @@ import {
   Check,
   MoveUpRight,
   AlertTriangle,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
-import { useVideos } from "@/hooks/useVideos";
+import { useVideos, useToggleVideoPublic } from "@/hooks/useVideos";
 
 const Page = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedPublicId, setCopiedPublicId] = useState<string | null>(null);
   const { isLoaded } = useUser();
   const { videosQuery } = useVideos();
+  const togglePublicMutation = useToggleVideoPublic();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
@@ -43,6 +47,12 @@ const Page = () => {
     navigator.clipboard.writeText(id);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 1500);
+  };
+
+  const handleCopyPublicLink = (publicSlug: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/v/${publicSlug}`);
+    setCopiedPublicId(publicSlug);
+    setTimeout(() => setCopiedPublicId(null), 1500);
   };
 
   return (
@@ -77,24 +87,27 @@ const Page = () => {
                   <th className="px-4 py-3 font-semibold">Video ID</th>
                   <th className="px-4 py-3 font-semibold">Playlist</th>
                   <th className="px-4 py-3 font-semibold">Views</th>
+                  <th className="px-4 py-3 font-semibold">Public</th>
                   <th className="px-4 py-3 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {videosQuery.isLoading ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
                       Loading videos...
                     </td>
                   </tr>
                 ) : videosQuery.data?.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
                       No videos found.
                     </td>
                   </tr>
                 ) : (
-                  videosQuery.data?.map((video) => (
+                  videosQuery.data?.map((video) => {
+                    const publicSlug = video.publicSlug;
+                    return (
                     <tr
                       key={video.id}
                       className="border-b border-hairline hover:bg-muted/50 transition-colors"
@@ -157,6 +170,65 @@ const Page = () => {
                         {video.totalViews.toLocaleString()}
                       </td>
 
+                      {/* Public */}
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          {video.isPublic && video.publicSlug ? (
+                            <span className="inline-flex items-center gap-1 bg-signal/10 text-signal text-xs px-2 py-1 rounded-sm border border-signal/20 font-medium">
+                              <Globe size={12} />
+                              Public
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 bg-muted text-muted-foreground text-xs px-2 py-1 rounded-sm border border-hairline font-medium">
+                              <Lock size={12} />
+                              Private
+                            </span>
+                          )}
+                          {publicSlug ? (
+                            <button
+                              onClick={() => handleCopyPublicLink(publicSlug)}
+                              className="text-muted-foreground hover:text-signal transition"
+                              title={
+                                copiedPublicId === publicSlug
+                                  ? "Copied!"
+                                  : "Copy public link"
+                              }
+                            >
+                              {copiedPublicId === publicSlug ? (
+                                <Check
+                                  size={14}
+                                  className="text-signal scale-110"
+                                />
+                              ) : (
+                                <Copy size={14} />
+                              )}
+                            </button>
+                          ) : null}
+                          <button
+                            onClick={() =>
+                              togglePublicMutation.mutate({
+                                videoId: video.id,
+                                isPublic: !video.isPublic,
+                              })
+                            }
+                            disabled={
+                              togglePublicMutation.isPending &&
+                              togglePublicMutation.variables?.videoId === video.id
+                            }
+                            className="text-muted-foreground hover:text-signal transition disabled:opacity-50"
+                            title={
+                              video.isPublic ? "Make Private" : "Make Public"
+                            }
+                          >
+                            {video.isPublic ? (
+                              <Lock size={14} />
+                            ) : (
+                              <Globe size={14} />
+                            )}
+                          </button>
+                        </div>
+                      </td>
+
                       {/* Actions */}
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
@@ -178,8 +250,8 @@ const Page = () => {
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
+                    );
+                  }))}
               </tbody>
             </table>
 

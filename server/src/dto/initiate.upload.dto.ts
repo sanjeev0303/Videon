@@ -13,4 +13,5 @@ export interface InitialUploadDto {
     playlist?: string;
     generateSubtitles?: boolean;
     includeWatermark?: boolean;
+    isPublic?: boolean;
 }

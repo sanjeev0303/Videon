@@ -17,6 +17,7 @@ import {
   FolderOpen,
   Tag,
   Globe,
+  Lock,
   Code2,
   Play,
   FileText,
@@ -35,6 +36,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useUser, useAuth } from "@clerk/nextjs";
 import { VideonPlayer } from "@videon/player/react";
+import { useToggleVideoPublic } from "@/hooks/useVideos";
 
 // Stats are generated dynamically below
 
@@ -84,6 +86,9 @@ export default function VideoDetailsPage() {
     enabled: isLoaded && !!videoId,
   });
 
+  const togglePublicMutation = useToggleVideoPublic();
+  const [copiedPublicLink, setCopiedPublicLink] = useState(false);
+
   const [copiedEmbed, setCopiedEmbed] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -107,6 +112,17 @@ export default function VideoDetailsPage() {
     navigator.clipboard.writeText(videoId);
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 1500);
+  };
+
+  const publicLink = videoData.publicSlug
+    ? `${window.location.origin}/v/${videoData.publicSlug}`
+    : null;
+
+  const handleCopyPublicLink = () => {
+    if (!publicLink) return;
+    navigator.clipboard.writeText(publicLink);
+    setCopiedPublicLink(true);
+    setTimeout(() => setCopiedPublicLink(false), 1500);
   };
 
   const formatBytes = (bytes: number) => {
@@ -409,6 +425,61 @@ export default function VideoDetailsPage() {
         <div className="bg-muted/40 rounded-sm p-4 font-mono text-xs text-muted-foreground overflow-x-auto border border-hairline">
           {embedCode}
         </div>
+      </div>
+
+      {/* Public Link */}
+      <div className="mt-6 rounded-sm bg-card border border-hairline p-5">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <div className="flex items-center gap-2">
+            <Globe size={16} className="text-muted-foreground" />
+            <h3 className="text-sm font-semibold">Public Link</h3>
+          </div>
+          {publicLink ? (
+            <button
+              onClick={() =>
+                togglePublicMutation.mutate({ videoId, isPublic: false })
+              }
+              disabled={togglePublicMutation.isPending}
+              className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-sm border border-hairline text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              <Lock size={12} />
+              Make Private
+            </button>
+          ) : (
+            <button
+              onClick={() =>
+                togglePublicMutation.mutate({ videoId, isPublic: true })
+              }
+              disabled={togglePublicMutation.isPending}
+              className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-sm border border-hairline text-foreground hover:bg-muted transition-colors disabled:opacity-50"
+            >
+              <Globe size={12} />
+              Make Public
+            </button>
+          )}
+        </div>
+        {publicLink ? (
+          <div className="flex items-center gap-2 bg-muted/40 rounded-sm p-4 border border-hairline">
+            <code className="flex-1 font-mono text-xs text-muted-foreground break-all">
+              {publicLink}
+            </code>
+            <button
+              onClick={handleCopyPublicLink}
+              className="text-muted-foreground hover:text-signal transition shrink-0"
+              title={copiedPublicLink ? "Copied!" : "Copy public link"}
+            >
+              {copiedPublicLink ? (
+                <Check size={14} className="text-signal" />
+              ) : (
+                <Copy size={14} />
+              )}
+            </button>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            This video is private. Make it public to share with anyone.
+          </p>
+        )}
       </div>
 
       {/* Stats Cards */}

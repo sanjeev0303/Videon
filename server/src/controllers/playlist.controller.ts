@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import type { IPlaylistService } from '../interfaces';
 import type { CreatePlaylistDto, UpdatePlaylistDto } from '../dto';
 import { AppError } from '../middleware/error.middleware';
+import { invalidateResponseCache } from '../utils';
 
 export class PlaylistController {
     constructor(private readonly playlistService: IPlaylistService) {}
@@ -17,6 +18,7 @@ export class PlaylistController {
             }
 
             const playlist = await this.playlistService.create(userId, data);
+            void invalidateResponseCache(userId);
             res.status(201).json({
                 message: 'Playlist created successfully',
                 playlist
@@ -70,6 +72,7 @@ export class PlaylistController {
             }
 
             const updated = await this.playlistService.update(userId, id as string, data);
+            void invalidateResponseCache(userId);
             res.status(200).json({ message: 'Playlist updated successfully', playlist: updated });
         } catch (error) {
             next(error);
@@ -87,6 +90,7 @@ export class PlaylistController {
             }
 
             const deleted = await this.playlistService.delete(userId, id as string);
+            void invalidateResponseCache(userId);
             res.status(200).json({ message: 'Playlist deleted successfully', playlist: deleted });
         } catch (error) {
             next(error);

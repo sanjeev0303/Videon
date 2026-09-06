@@ -11,6 +11,7 @@ export type UploadVideoFields = {
     generateSubtitles?: boolean;
     tags?: string[];
     includeWatermark?: boolean;
+    isPublic?: boolean;
     video: File;
 }
 
@@ -29,6 +30,7 @@ export type UploadVideoTypes = {
   generateSubtitles?: boolean;
   tags?: string[];
   includeWatermark?: boolean;
+  isPublic?: boolean;
   type: string;
 };
 

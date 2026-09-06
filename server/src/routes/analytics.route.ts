@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { handleAnalyticsEvent, getAnalytics, getMainAnalytics } from '../controllers/analytics.controller';
-import { clerkAuthMiddleware } from '../middleware';
+import { clerkAuthMiddleware, responseCache } from '../middleware';
 
 export const createAnalyticsRouter = (): Router => {
   const router = Router();
@@ -9,8 +9,8 @@ export const createAnalyticsRouter = (): Router => {
   router.post('/event', handleAnalyticsEvent);
 
   // Authenticated routes
-  router.get('/', clerkAuthMiddleware, getAnalytics);
-  router.get('/main', clerkAuthMiddleware, getMainAnalytics);
+  router.get('/', clerkAuthMiddleware, responseCache(60), getAnalytics);
+  router.get('/main', clerkAuthMiddleware, responseCache(60), getMainAnalytics);
 
   return router;
 };

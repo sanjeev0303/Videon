@@ -1,61 +1,68 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_SERVER_URI || 'http://localhost:8000/api/v1';
+
+type BillingData = {
+  plan: string;
+  nextBillingDate: string | null;
+  invoices: any[];
+};
 
 export const useBilling = () => {
-  const { getToken } = useAuth();
-  const [currentPlan, setCurrentPlan] = useState<string>('FREE');
-  const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const { getToken, isLoaded } = useAuth();
+  const queryClient = useQueryClient();
 
-  const fetchBillingData = useCallback(async () => {
-    try {
-      setLoading(true);
-      const token = await getToken();
-      
-      const searchParams = new URLSearchParams(window.location.search);
-      const sessionId = searchParams.get('session_id');
+  const fetchBillingData = useCallback(async (): Promise<BillingData> => {
+    const token = await getToken();
 
-      if (sessionId) {
-        // Sync the session to guarantee the plan updates immediately, bypassing the webhook delay
-        await fetch(`${API_URL}/billing/sync`, {
-          method: 'POST',
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ sessionId })
-        });
-        
-        // Remove session_id from URL without reloading
-        const newUrl = window.location.pathname + window.location.search.replace(/(&|\?)session_id=[^&]+/, '');
-        window.history.replaceState({}, document.title, newUrl || window.location.pathname);
-      }
+    const searchParams = new URLSearchParams(window.location.search);
+    const sessionId = searchParams.get('session_id');
 
-      const planRes = await fetch(`${API_URL}/billing/current`, {
-        headers: { Authorization: `Bearer ${token}` }
+    if (sessionId) {
+      // Sync the session to guarantee the plan updates immediately, bypassing the webhook delay
+      await fetch(`${API_URL}/billing/sync`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sessionId })
       });
-      const planData = await planRes.json();
-      if (planData.data?.plan) setCurrentPlan(planData.data.plan);
-      if (planData.data?.nextBillingDate) setNextBillingDate(planData.data.nextBillingDate);
 
-      const invoiceRes = await fetch(`${API_URL}/billing/invoices`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const invoiceData = await invoiceRes.json();
-      if (invoiceData.data?.invoices) setInvoices(invoiceData.data.invoices);
-    } catch (error) {
-      console.error('Failed to fetch billing data', error);
-    } finally {
-      setLoading(false);
+      // Remove session_id from URL without reloading
+      const newUrl = window.location.pathname + window.location.search.replace(/(&|\?)session_id=[^&]+/, '');
+      window.history.replaceState({}, document.title, newUrl || window.location.pathname);
     }
+
+    const planRes = await fetch(`${API_URL}/billing/current`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const planData = await planRes.json();
+
+    const invoiceRes = await fetch(`${API_URL}/billing/invoices`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const invoiceData = await invoiceRes.json();
+
+    return {
+      plan: planData.data?.plan ?? 'FREE',
+      nextBillingDate: planData.data?.nextBillingDate ?? null,
+      invoices: invoiceData.data?.invoices ?? [],
+    };
   }, [getToken]);
 
-  useEffect(() => {
-    fetchBillingData();
-  }, [fetchBillingData]);
+  const billingQuery = useQuery({
+    queryKey: ['billing'],
+    queryFn: fetchBillingData,
+    enabled: isLoaded,
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const refetchBilling = useCallback(() => {
+    return queryClient.invalidateQueries({ queryKey: ['billing'] });
+  }, [queryClient]);
 
   const openPortal = async () => {
     try {
@@ -77,7 +84,7 @@ export const useBilling = () => {
       const token = await getToken();
       const res = await fetch(`${API_URL}/billing/checkout`, {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
@@ -93,11 +100,11 @@ export const useBilling = () => {
   };
 
   return {
-    currentPlan,
-    nextBillingDate,
-    invoices,
-    loading,
-    fetchBillingData,
+    currentPlan: billingQuery.data?.plan ?? 'FREE',
+    nextBillingDate: billingQuery.data?.nextBillingDate ?? null,
+    invoices: billingQuery.data?.invoices ?? [],
+    loading: billingQuery.isPending || billingQuery.isFetching,
+    fetchBillingData: refetchBilling,
     openPortal,
     checkout,
   };

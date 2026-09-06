@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PlayerController } from '../controllers/player.controller';
 import { PlayerService } from '../services/player.service';
 import { PlayerRepository } from '../repositories/player.repository';
-import { clerkAuthMiddleware, playerGuard } from '../middleware';
+import { clerkAuthMiddleware, playerGuard, responseCache } from '../middleware';
 
 export const createPlayerRouter = (): Router => {
   const router = Router();
@@ -15,7 +15,7 @@ export const createPlayerRouter = (): Router => {
   router.use(playerGuard);
 
   router.get('/loadVideo/:videoTrackingId', playerController.loadVideo);
-  router.get('/settings', playerController.getSettings);
+  router.get('/settings', responseCache(60), playerController.getSettings);
   router.put('/settings', playerController.updateSettings);
 
   return router;

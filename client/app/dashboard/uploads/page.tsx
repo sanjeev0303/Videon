@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { videon } from "@videon/sdk";
 import { usePlaylists } from "@/hooks/usePlaylists";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 // Define the schema using Zod
@@ -55,6 +56,10 @@ const uploadSchema = z.object({
     .string()
     .optional()
     .transform((val) => val === "true"),
+  isPublic: z
+    .string()
+    .optional()
+    .transform((val) => val === "true"),
   video: z
     .any()
     .refine((val) => val instanceof File, "Video file is required"),
@@ -76,6 +81,7 @@ const Page = () => {
     defaultValues: {
       generateSubtitles: "true",
       includeWatermark: "true",
+      isPublic: "false",
     },
   });
 
@@ -105,6 +111,7 @@ const Page = () => {
 
   const { playlistsQuery } = usePlaylists();
   const { data: playlists, isLoading, error } = playlistsQuery;
+  const queryClient = useQueryClient();
 
   const resetForm = () => {
     reset();
@@ -132,6 +139,9 @@ const Page = () => {
             }
           },
         });
+
+        queryClient.invalidateQueries({ queryKey: ["videos"] });
+        queryClient.invalidateQueries({ queryKey: ["playlists"] });
 
         resetForm();
         toast.success(
@@ -294,11 +304,22 @@ const Page = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-1">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="includeWatermark">Include Watermark?</Label>
                     <select
                       {...register("includeWatermark")}
+                      className="flex h-9 w-full rounded-sm border border-input bg-muted/40 px-3 py-2 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="isPublic">Make Video Public?</Label>
+                    <select
+                      {...register("isPublic")}
                       className="flex h-9 w-full rounded-sm border border-input bg-muted/40 px-3 py-2 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="true">Yes</option>

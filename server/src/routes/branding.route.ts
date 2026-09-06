@@ -4,6 +4,7 @@ import { BrandingController } from '../controllers/branding.controller';
 import { BrandingService } from '../services/branding.service';
 import { BrandingRepository } from '../repositories/branding.repository';
 import { clerkAuthMiddleware } from '../middleware/clerk.middleware';
+import { responseCache } from '../middleware';
 
 export const createBrandingRouter = (): Router => {
   const router = Router();
@@ -19,7 +20,7 @@ export const createBrandingRouter = (): Router => {
 
   router.use(clerkAuthMiddleware);
 
-  router.get('/watermark', brandingController.getWatermark);
+  router.get('/watermark', responseCache(60), brandingController.getWatermark);
   router.post('/watermark', brandingController.updateWatermark);
   router.post('/watermark/upload', upload.single('file'), brandingController.uploadWatermark);
 

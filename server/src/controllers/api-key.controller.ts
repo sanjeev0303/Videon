@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import type { IApiKeyService } from '../interfaces';
 import type { CreateApiKeyDto, UpdateApiKeyDto } from '../dto';
+import { invalidateResponseCache } from '../utils';
 
 export class ApiKeyController {
     constructor(private readonly apiKeyService: IApiKeyService) {}
@@ -18,6 +19,7 @@ export class ApiKeyController {
             data.user_id = userId; // Override with authenticated user
 
             const result = await this.apiKeyService.createApiKey(data);
+            void invalidateResponseCache(userId);
             res.status(201).json({
                 message: 'API Key created successfully',
                 unhashedKey: result.unhashedKey,
@@ -56,6 +58,7 @@ export class ApiKeyController {
             }
 
             await this.apiKeyService.deleteApiKey(userId, id as string);
+            void invalidateResponseCache(userId);
             res.status(200).json({ message: 'API Key revoked successfully' });
         } catch (error) {
             console.error('Error revoking API key:', error);
@@ -74,6 +77,7 @@ export class ApiKeyController {
             }
 
             const result = await this.apiKeyService.regenerateApiKey(userId, id as string);
+            void invalidateResponseCache(userId);
             res.status(200).json(result);
         } catch (error) {
             console.error('Error regenerating API key:', error);

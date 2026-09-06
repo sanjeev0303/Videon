@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { PlayerService } from '../services/player.service';
+import { invalidateResponseCache } from '../utils';
 
 export class PlayerController {
   constructor(private readonly playerService: PlayerService) {}
@@ -34,6 +35,7 @@ export class PlayerController {
         return res.status(401).json({ message: 'Unauthorized' });
       }
       const data = await this.playerService.updatePlayerSettings(userId, req.body);
+      void invalidateResponseCache(userId);
       res.status(200).json(data);
     } catch (error) {
       next(error);

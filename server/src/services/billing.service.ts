@@ -1,7 +1,7 @@
 import { createClerkClient } from '@clerk/backend';
 import Stripe from 'stripe';
 import { PlanTier, normalizePlanTier, planRedisKey, usageRedisKey, hardLockRedisKey, PLAN_REDIS_TTL_SEC } from '../config/constant.config';
-import { redisClient } from '../utils';
+import { redisClient, invalidateResponseCache } from '../utils';
 import { BillingRepository } from '../repositories/billing.repository';
 import { planCache, usageCache, PLAN_DEFAULTS } from '../middleware/upload.middleware';
 
@@ -304,6 +304,10 @@ export class BillingService {
       minutesStreamed: Number(minutesStreamedSeconds),
       minutesStreamedLimit: Number(limits.minutesLimit),
     });
+
+    // Purge the user's cached responses (current plan + invoices) so the next
+    // dashboard read reflects the new subscription state immediately.
+    await invalidateResponseCache(userId);
   }
 
   async listInvoices(userId: string) {
@@ -361,5 +365,8 @@ export class BillingService {
       period_end: periodEnd,
       updated_at: new Date(),
     });
+
+    // A new/updated invoice changes the billing screen — purge cached responses.
+    await invalidateResponseCache(userId);
   }
 }

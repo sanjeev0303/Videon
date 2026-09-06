@@ -33,6 +33,10 @@ export class UploadService implements IUploadService {
 
     const videoId = crypto.randomUUID();
 
+    // Generate the public share slug only when the uploader opted in at upload
+    // time. Videos never made public get no URL at all.
+    const publicSlug = dto.isPublic ? crypto.randomBytes(12).toString('base64url') : null;
+
     await this.uploadRepository.createVideoMetadata({
       id: videoId,
       user_id: userId,
@@ -50,6 +54,8 @@ export class UploadService implements IUploadService {
       playlist_id: dto.playlist && dto.playlist.trim() !== '' ? dto.playlist : null,
       generateSubtitles: dto.generateSubtitles ?? false,
       includeWatermark: dto.includeWatermark ?? false,
+      isPublic: dto.isPublic ?? false,
+      publicSlug,
       status: 'PENDING',
     });
 
@@ -63,7 +69,7 @@ export class UploadService implements IUploadService {
     const reservedBytes = dto.videoSize + dto.thumbnailSize;
     await this.uploadRepository.incrementRedisStorageUsage(userId, reservedBytes);
 
-    return { ...uploadData, videoId };
+    return { ...uploadData, videoId, publicSlug };
   }
 
   async complete(
@@ -233,5 +239,30 @@ export class UploadService implements IUploadService {
 
   async getDailyAnalytics(videoId: string, userId: string) {
     return this.uploadRepository.getDailyAnalytics(videoId, userId);
+  }
+
+  async toggleVideoPublic(videoId: string, userId: string, isPublic: boolean) {
+    const existing = await this.uploadRepository.getVideoPublicStatus(videoId, userId);
+    if (!existing) {
+      throw new AppError('Video not found or access denied', 404);
+    }
+
+    // Reuse the existing slug when a video is made public again; clearing it on
+    // revoke means the old URL stops resolving immediately.
+    const publicSlug = isPublic
+      ? existing.publicSlug ?? crypto.randomBytes(12).toString('base64url')
+      : null;
+
+    const updated = await this.uploadRepository.updateVideoMetadata(videoId, {
+      isPublic,
+      publicSlug,
+      updated_at: new Date(),
+    });
+
+    return { id: updated.id, isPublic: updated.isPublic, publicSlug: updated.publicSlug };
+  }
+
+  async getPublicVideoBySlug(publicSlug: string) {
+    return this.uploadRepository.getPublicVideoBySlug(publicSlug);
   }
 }

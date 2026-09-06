@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import type { IUploadService } from '../interfaces/upload.service.interface';
 import type { InitialUploadDto } from '../dto/initiate.upload.dto';
 import type { UploadFilePart, PlanTier } from '../config';
+import { invalidateResponseCache } from '../utils';
 
 export class UploadController {
   constructor(private readonly uploadService: IUploadService) {}
@@ -50,6 +51,7 @@ export class UploadController {
         videoId,
         plan
       );
+      void invalidateResponseCache(userId);
       res.status(200).json(result);
     } catch (error: any) {
       console.error('Error completing upload:', error);
@@ -71,6 +73,7 @@ export class UploadController {
     try {
       const { videoId, thumbnailFileName, thumbnailContentType, thumbnailSize } = req.body;
       const thumbnail = req.file;
+      const userId = req.user?.id;
 
       if (!thumbnail || !thumbnailContentType || !thumbnailFileName || !thumbnailSize) {
         res.status(400).json({ error: 'Thumbnail file is required!' });
@@ -84,6 +87,9 @@ export class UploadController {
         thumbnailContentType,
         Number(thumbnailSize)
       );
+      if (userId) {
+        void invalidateResponseCache(userId);
+      }
       res.status(200).json(result);
     } catch (error: any) {
       console.error('Error uploading thumbnail:', error);
@@ -120,6 +126,49 @@ export class UploadController {
       res.status(200).json(result);
     } catch (error: any) {
       console.error('Error getting video metadata:', error);
+      res.status(error.statusCode || 500).json({ error: error.message || 'Internal server error' });
+    }
+  };
+
+  togglePublic = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = req.user?.id;
+      const { videoId } = req.params;
+      const { isPublic } = req.body;
+
+      if (!userId) {
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
+      }
+
+      if (typeof isPublic !== 'boolean') {
+        res.status(400).json({ error: 'isPublic must be a boolean' });
+        return;
+      }
+
+      const result = await this.uploadService.toggleVideoPublic(videoId as string, userId, isPublic);
+      void invalidateResponseCache(userId);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error('Error toggling public status:', error);
+      res.status(error.statusCode || 500).json({ error: error.message || 'Internal server error' });
+    }
+  };
+
+  getPublicVideo = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { publicSlug } = req.params;
+
+      // Slug resolution is intentionally unauthenticated: the slug itself is
+      // the access secret. The service only returns public + ready videos.
+      const result = await this.uploadService.getPublicVideoBySlug(publicSlug as string);
+      if (!result) {
+        res.status(404).json({ error: 'Video not found' });
+        return;
+      }
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error('Error getting public video:', error);
       res.status(error.statusCode || 500).json({ error: error.message || 'Internal server error' });
     }
   };

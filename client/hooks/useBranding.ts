@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type WatermarkSettings = {
   enabled: boolean;
@@ -12,22 +13,19 @@ export type WatermarkSettings = {
   plan: string;
 };
 
-export const useBranding = () => {
-  const { getToken } = useAuth();
-  const [settings, setSettings] = useState<WatermarkSettings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+const API_URL = process.env.NEXT_PUBLIC_SERVER_URI || 'http://localhost:8000/api/v1';
 
-  const fetchSettings = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+export const useBranding = () => {
+  const { getToken, isLoaded } = useAuth();
+  const queryClient = useQueryClient();
+
+  const settingsQuery = useQuery<WatermarkSettings>({
+    queryKey: ['branding', 'watermark'],
+    queryFn: async () => {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/branding/watermark`, {
+      const response = await fetch(`${API_URL}/branding/watermark`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -37,23 +35,18 @@ export const useBranding = () => {
         throw new Error('Failed to fetch branding settings');
       }
 
-      const data = await response.json();
-      setSettings(data);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while fetching branding settings');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getToken]);
+      return response.json();
+    },
+    enabled: isLoaded,
+    staleTime: 60 * 1000,
+  });
 
-  const updateSettings = async (updates: Partial<WatermarkSettings>) => {
-    try {
-      setIsSaving(true);
-      setError(null);
+  const updateMutation = useMutation<WatermarkSettings, Error, Partial<WatermarkSettings>>({
+    mutationFn: async (updates) => {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/branding/watermark`, {
+      const response = await fetch(`${API_URL}/branding/watermark`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,32 +56,26 @@ export const useBranding = () => {
       });
 
       if (!response.ok) {
-        const d = await response.json().catch(()=>({}));
+        const d = await response.json().catch(() => ({}));
         throw new Error(d.message || 'Failed to update branding settings');
       }
 
-      const data = await response.json();
-      setSettings(data);
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while updating branding settings');
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['branding', 'watermark'], data);
+    },
+  });
 
-  const uploadWatermark = async (file: File) => {
-    try {
-      setIsSaving(true);
-      setUploadError(null);
+  const uploadMutation = useMutation<WatermarkSettings, Error, File>({
+    mutationFn: async (file) => {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
 
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/branding/watermark/upload`, {
+      const response = await fetch(`${API_URL}/branding/watermark/upload`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -97,31 +84,47 @@ export const useBranding = () => {
       });
 
       if (!response.ok) {
-        const d = await response.json().catch(()=>({}));
+        const d = await response.json().catch(() => ({}));
         throw new Error(d.message || d.error || 'Failed to upload watermark');
       }
 
-      const data = await response.json();
-      setSettings(data);
-      return true;
-    } catch (err: any) {
-      setUploadError(err.message || 'An error occurred while uploading watermark');
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['branding', 'watermark'], data);
+    },
+  });
 
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+  const updateSettings = useCallback(
+    async (updates: Partial<WatermarkSettings>) => {
+      try {
+        await updateMutation.mutateAsync(updates);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [updateMutation],
+  );
+
+  const uploadWatermark = useCallback(
+    async (file: File) => {
+      try {
+        await uploadMutation.mutateAsync(file);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [uploadMutation],
+  );
 
   return {
-    settings,
-    isLoading,
-    isSaving,
-    error,
-    uploadError,
+    settings: settingsQuery.data ?? null,
+    isLoading: settingsQuery.isPending,
+    isSaving: updateMutation.isPending || uploadMutation.isPending,
+    error: settingsQuery.error?.message ?? updateMutation.error?.message ?? null,
+    uploadError: uploadMutation.error?.message ?? null,
     updateSettings,
     uploadWatermark,
   };

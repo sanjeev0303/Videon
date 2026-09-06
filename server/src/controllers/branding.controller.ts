@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { BrandingService } from '../services/branding.service';
+import { invalidateResponseCache } from '../utils';
 
 export class BrandingController {
   constructor(private readonly brandingService: BrandingService) {}
@@ -24,6 +25,7 @@ export class BrandingController {
         return res.status(401).json({ message: 'Unauthorized' });
       }
       const data = await this.brandingService.updateWatermarkSettings(userId, req.body);
+      void invalidateResponseCache(userId);
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -40,6 +42,7 @@ export class BrandingController {
         return res.status(400).json({ message: 'Missing file' });
       }
       const data = await this.brandingService.uploadWatermark(userId, req.file);
+      void invalidateResponseCache(userId);
       res.status(200).json(data);
     } catch (error) {
       next(error);

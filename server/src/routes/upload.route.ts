@@ -3,7 +3,7 @@ import multer from 'multer';
 import { UploadController } from '../controllers/upload.controller';
 import { UploadService } from '../services/upload.service';
 import { UploadRepository } from '../repositories/upload.repository';
-import { clerkAuthMiddleware, uploadGuard } from '../middleware';
+import { clerkAuthMiddleware, uploadGuard, responseCache } from '../middleware';
 
 export const createUploadRouter = (): Router => {
   const uploadRepository = new UploadRepository();
@@ -28,8 +28,9 @@ export const createUploadRouter = (): Router => {
     upload.single('thumbnail'),
     uploadController.uploadThumbnail,
   );
-  router.get('/get-videos-metadata', clerkAuthMiddleware, uploadController.getVideosMetadata);
-  router.get('/get-video-metadata/:videoId', clerkAuthMiddleware, uploadController.getVideoMetadata);
-  router.get('/get-daily-analytics/:videoId', clerkAuthMiddleware, uploadController.getDailyAnalytics);
+  router.patch('/toggle-public/:videoId', clerkAuthMiddleware, uploadGuard, uploadController.togglePublic);
+  router.get('/get-videos-metadata', clerkAuthMiddleware, responseCache(60), uploadController.getVideosMetadata);
+  router.get('/get-video-metadata/:videoId', clerkAuthMiddleware, responseCache(60), uploadController.getVideoMetadata);
+  router.get('/get-daily-analytics/:videoId', clerkAuthMiddleware, responseCache(120), uploadController.getDailyAnalytics);
   return router;
 };

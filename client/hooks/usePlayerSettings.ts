@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export type PlayerSettings = {
   primaryColor?: string;
@@ -16,21 +17,19 @@ export type PlayerSettings = {
   };
 };
 
-export const usePlayerSettings = () => {
-  const { getToken } = useAuth();
-  const [settings, setSettings] = useState<PlayerSettings | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const API_URL = process.env.NEXT_PUBLIC_SERVER_URI || 'http://localhost:8000/api/v1';
 
-  const fetchSettings = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+export const usePlayerSettings = () => {
+  const { getToken, isLoaded } = useAuth();
+  const queryClient = useQueryClient();
+
+  const settingsQuery = useQuery<PlayerSettings>({
+    queryKey: ['player-settings'],
+    queryFn: async () => {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/player/settings`, {
+      const response = await fetch(`${API_URL}/player/settings`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,23 +39,18 @@ export const usePlayerSettings = () => {
         throw new Error('Failed to fetch player settings');
       }
 
-      const data = await response.json();
-      setSettings(data);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while fetching player settings');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [getToken]);
+      return response.json();
+    },
+    enabled: isLoaded,
+    staleTime: 60 * 1000,
+  });
 
-  const updateSettings = async (newSettings: PlayerSettings) => {
-    try {
-      setIsSaving(true);
-      setError(null);
+  const updateMutation = useMutation<PlayerSettings, Error, PlayerSettings>({
+    mutationFn: async (newSettings) => {
       const token = await getToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/player/settings`, {
+      const response = await fetch(`${API_URL}/player/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -69,26 +63,30 @@ export const usePlayerSettings = () => {
         throw new Error('Failed to update player settings');
       }
 
-      const data = await response.json();
-      setSettings(data);
-      return true;
-    } catch (err: any) {
-      setError(err.message || 'An error occurred while updating player settings');
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  };
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(['player-settings'], data);
+    },
+  });
 
-  useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+  const updateSettings = useCallback(
+    async (newSettings: PlayerSettings) => {
+      try {
+        await updateMutation.mutateAsync(newSettings);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [updateMutation],
+  );
 
   return {
-    settings,
-    isLoading,
-    isSaving,
-    error,
+    settings: settingsQuery.data ?? null,
+    isLoading: settingsQuery.isPending,
+    isSaving: updateMutation.isPending,
+    error: settingsQuery.error?.message ?? updateMutation.error?.message ?? null,
     updateSettings,
   };
 };

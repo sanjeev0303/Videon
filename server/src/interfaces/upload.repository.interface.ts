@@ -26,6 +26,8 @@ export interface IUploadRepository {
     thumbnailTrackingId: string | null;
     videoTrackingId: string | null;
     status: string;
+    isPublic: boolean;
+    publicSlug: string | null;
     playlist_id: string | null;
     playlist_name?: string;
     created_at: Date;
@@ -38,6 +40,8 @@ export interface IUploadRepository {
     description: string | null;
     videoTrackingId: string | null;
     status: string;
+    isPublic: boolean;
+    publicSlug: string | null;
     playlist_name?: string;
     tags: string[];
     videoSize: number;
@@ -54,6 +58,19 @@ export interface IUploadRepository {
       geo: string[];
       device: string[];
     };
+  } | null>;
+  getVideoPublicStatus(videoId: string, userId: string): Promise<{
+    id: string;
+    isPublic: boolean;
+    publicSlug: string | null;
+  } | null>;
+  getPublicVideoBySlug(publicSlug: string): Promise<{
+    id: string;
+    title: string;
+    description: string | null;
+    thumbnailTrackingId: string | null;
+    videoTrackingId: string | null;
+    status: string;
   } | null>;
   getDailyAnalytics(videoId: string, userId: string): Promise<any>;
 }

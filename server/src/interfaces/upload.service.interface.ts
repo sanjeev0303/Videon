@@ -24,4 +24,6 @@ export interface IUploadService {
   getVideosMetadata(userId: string): Promise<any[]>;
   getVideoMetadata(videoId: string, userId: string): Promise<any>;
   getDailyAnalytics(videoId: string, userId: string): Promise<any>;
+  toggleVideoPublic(videoId: string, userId: string, isPublic: boolean): Promise<any>;
+  getPublicVideoBySlug(publicSlug: string): Promise<any>;
 }

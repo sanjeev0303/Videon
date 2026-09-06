@@ -10,6 +10,12 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
+  // Public watch pages are open; the server only resolves slugs for videos
+  // that are public and ready, so the slug itself is the access gate.
+  if (pathname === "/v" || pathname.startsWith("/v/")) {
+    return NextResponse.next();
+  }
+
   // Landing pages and Clerk auth pages are public
   if (
     pathname === "/" ||

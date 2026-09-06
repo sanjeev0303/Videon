@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 
 export type MainAnalyticsData = {
@@ -38,6 +38,7 @@ export const useMainAnalytics = (range: "7d" | "14d" | "30d" = "30d") => {
     queryKey: ["main-analytics", range],
     queryFn: fetchMainAnalytics,
     enabled: isLoaded,
+    placeholderData: keepPreviousData,
   });
 
   return {

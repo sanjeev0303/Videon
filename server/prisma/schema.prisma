@@ -85,6 +85,8 @@ model VideoMetadata {
   includeWatermark     Boolean?    @default(false) @map("include_watermark")
   videoTrackingId      String?     @map("video_tracking_id")
   thumbnailTrackingId  String?     @map("thumbnail_tracking_id")
+  isPublic             Boolean     @default(false) @map("is_public")
+  publicSlug           String?     @unique @map("public_slug")
   status               VideoStatus @default(PENDING)
   created_at           DateTime    @default(now()) @db.Timestamptz()
   updated_at           DateTime    @default(now()) @db.Timestamptz()

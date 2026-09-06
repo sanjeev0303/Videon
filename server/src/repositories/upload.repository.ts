@@ -121,6 +121,8 @@ export class UploadRepository implements IUploadRepository {
     thumbnailTrackingId: string | null;
     videoTrackingId: string | null;
     status: string;
+    isPublic: boolean;
+    publicSlug: string | null;
     playlist_id: string | null;
     playlist_name?: string;
     created_at: Date;
@@ -135,6 +137,8 @@ export class UploadRepository implements IUploadRepository {
         thumbnailTrackingId: true,
         videoTrackingId: true,
         status: true,
+        isPublic: true,
+        publicSlug: true,
         playlist_id: true,
         created_at: true,
       },
@@ -169,6 +173,8 @@ export class UploadRepository implements IUploadRepository {
       thumbnailTrackingId: video.thumbnailTrackingId,
       videoTrackingId: video.videoTrackingId,
       status: video.status,
+      isPublic: video.isPublic,
+      publicSlug: video.publicSlug,
       playlist_id: video.playlist_id,
       playlist_name: video.playlist_id ? playlistMap.get(video.playlist_id) : undefined,
       created_at: video.created_at,
@@ -182,6 +188,8 @@ export class UploadRepository implements IUploadRepository {
     description: string | null;
     videoTrackingId: string | null;
     status: string;
+    isPublic: boolean;
+    publicSlug: string | null;
     playlist_name?: string;
     tags: string[];
     videoSize: number;
@@ -240,6 +248,8 @@ export class UploadRepository implements IUploadRepository {
       description: video.description,
       videoTrackingId: video.videoTrackingId,
       status: video.status,
+      isPublic: video.isPublic,
+      publicSlug: video.publicSlug,
       playlist_name: playlist?.name,
       tags: video.tags,
       videoSize: videoSizeNumber + transcodingSizeNumber,
@@ -257,6 +267,41 @@ export class UploadRepository implements IUploadRepository {
         device: analytics?.device || [],
       },
     };
+  }
+
+  async getVideoPublicStatus(
+    videoId: string,
+    userId: string,
+  ): Promise<{ id: string; isPublic: boolean; publicSlug: string | null } | null> {
+    return prisma.videoMetadata.findUnique({
+      where: { id: videoId, user_id: userId },
+      select: {
+        id: true,
+        isPublic: true,
+        publicSlug: true,
+      },
+    });
+  }
+
+  async getPublicVideoBySlug(publicSlug: string): Promise<{
+    id: string;
+    title: string;
+    description: string | null;
+    thumbnailTrackingId: string | null;
+    videoTrackingId: string | null;
+    status: string;
+  } | null> {
+    return prisma.videoMetadata.findFirst({
+      where: { publicSlug, isPublic: true, status: 'READY' },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        thumbnailTrackingId: true,
+        videoTrackingId: true,
+        status: true,
+      },
+    });
   }
 
   async getDailyAnalytics(videoId: string, userId: string): Promise<any> {

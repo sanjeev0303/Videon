@@ -9,6 +9,8 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
             queries: {
                 // 5 minutes stale time
                 staleTime: 5 * 60 * 1000,
+                // Keep cached data available for 30 minutes before garbage collection
+                gcTime: 30 * 60 * 1000,
                 // Refetch on window focus is often good, but can be disabled if too aggressive
                 refetchOnWindowFocus: false,
                 retry: 1

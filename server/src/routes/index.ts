@@ -6,6 +6,7 @@ import { createPlayerRouter } from './player.route';
 import { createAnalyticsRouter } from './analytics.route';
 import { billingRouter } from './billing.route';
 import { createBrandingRouter } from './branding.route';
+import { createPublicRouter } from './public.route';
 
 export const createRoutes = (): Router => {
   const router = Router();
@@ -17,6 +18,7 @@ export const createRoutes = (): Router => {
   router.use('/analytics', createAnalyticsRouter());
   router.use('/billing', billingRouter);
   router.use('/branding', createBrandingRouter());
+  router.use('/public', createPublicRouter());
 
   return router;
 };
@@ -28,3 +30,4 @@ export * from './player.route';
 export * from './analytics.route';
 export * from './billing.route';
 export * from './branding.route';
+export * from './public.route';

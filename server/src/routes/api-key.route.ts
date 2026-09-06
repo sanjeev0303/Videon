@@ -3,7 +3,7 @@ import { ApiKeyController } from '../controllers';
 import { ApiKeyService } from '../services';
 import { ApiKeyRepository } from '../repositories';
 
-import { clerkAuthMiddleware } from '../middleware';
+import { clerkAuthMiddleware, responseCache } from '../middleware';
 
 export const createApiKeyRouter = (): Router => {
   const apiKeyRepository = new ApiKeyRepository();
@@ -16,7 +16,7 @@ export const createApiKeyRouter = (): Router => {
   apiKeyRouter.use(clerkAuthMiddleware);
 
   apiKeyRouter.post('/', apiKeyController.create);
-  apiKeyRouter.get('/', apiKeyController.list);
+  apiKeyRouter.get('/', responseCache(30), apiKeyController.list);
   apiKeyRouter.post('/validate', apiKeyController.validate);
   apiKeyRouter.get('/:id', apiKeyController.lastUsed);
   apiKeyRouter.delete('/:id', apiKeyController.delete);

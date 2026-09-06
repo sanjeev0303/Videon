@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PlaylistController } from '../controllers';
 import { PlaylistService } from '../services';
 import { PlaylistRepository } from '../repositories';
-import { clerkAuthMiddleware } from '../middleware';
+import { clerkAuthMiddleware, responseCache } from '../middleware';
 
 export const createPlaylistRouter = (): Router => {
     const playlistRepository = new PlaylistRepository();
@@ -16,8 +16,8 @@ export const createPlaylistRouter = (): Router => {
 
 
     router.post('/', playlistController.create);
-    router.get('/', playlistController.findAll);
-    router.get('/:id', playlistController.findOne);
+    router.get('/', responseCache(60), playlistController.findAll);
+    router.get('/:id', responseCache(60), playlistController.findOne);
     router.put('/:id', playlistController.update);
     router.delete('/:id', playlistController.delete);
 
