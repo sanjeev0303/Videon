@@ -43,7 +43,13 @@ export class BillingService {
     if (record?.stripe_subscription_id) {
       try {
         const sub = await this.stripe.subscriptions.retrieve(record.stripe_subscription_id) as any;
-        nextBillingDate = new Date(sub.current_period_end * 1000).toISOString();
+        const periodEnd = sub?.current_period_end;
+        if (typeof periodEnd === "number" && Number.isFinite(periodEnd) && periodEnd > 0) {
+          const date = new Date(periodEnd * 1000);
+          if (!Number.isNaN(date.getTime())) {
+            nextBillingDate = date.toISOString();
+          }
+        }
       } catch (err) {
         console.error('Failed to retrieve stripe subscription', err);
       }
