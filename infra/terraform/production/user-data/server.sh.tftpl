@@ -1,0 +1,109 @@
+#!/bin/bash
+set -euo pipefail
+
+apt-get update -y
+apt-get install -y ca-certificates curl gnupg unzip git build-essential python3
+
+fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+
+curl -fsSL https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -o /tmp/cwa.deb
+dpkg -i /tmp/cwa.deb
+
+cat > /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json << 'CWA'
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/var/log/videon-api.log",
+            "log_group_name": "/videon/api",
+            "log_stream_name": "{instance_id}"
+          }
+        ]
+      }
+    }
+  }
+}
+CWA
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
+
+mkdir -p /opt/videon /opt/motionmesh
+git clone --depth 1 --branch ${github_branch} ${github_repository} /opt/videon
+# server/package.json depends on @motionmesh/storage via file:../../motionmesh/... - sibling clone + build required first
+git clone --depth 1 --branch ${github_branch} ${motionmesh_repository} /opt/motionmesh
+cd /opt/motionmesh/sdk/js/packages/storage
+npm install --no-fund --no-audit
+npm run build
+
+cd /opt/videon/server
+cat > /opt/videon/server/.env << 'ENVFILE'
+NODE_ENV=production
+HOST=0.0.0.0
+PORT=8000
+DATABASE_URL=${database_url}
+REDIS_URL=${redis_url}
+NATS_URL=${nats_url}
+CLERK_SECRET_KEY=${clerk_secret_key}
+REDIS_KEY_SECRET=${redis_key_secret}
+ANALYTICS_JWT_SECRET=${analytics_jwt_secret}
+MOTIONMESH_API_KEY=${motionmesh_api_key}
+MOTIONMESH_BUCKET_ID=${motionmesh_bucket_id}
+MOTIONMESH_TRANSCODE_BUCKET_ID=${motionmesh_transcode_bucket_id}
+MOTIONMESH_BASE_URL=${motionmesh_base_url}
+AWS_PUBLIC_ACCESS_KEY=${s3_access_key_id}
+AWS_SECRET_ACCESS_KEY=${s3_access_key_secret}
+AWS_REGION=${aws_region}
+AWS_S3_BUCKET_NAME=${storage_bucket}
+STRIPE_SECRET_KEY=${stripe_secret_key}
+STRIPE_WEBHOOK_SECRET=${stripe_webhook_secret}
+STRIPE_PRICE_STARTER=${stripe_price_starter}
+STRIPE_PRICE_PRO=${stripe_price_pro}
+STRIPE_PRICE_BUSINESS=${stripe_price_business}
+FRONTEND_URL=${frontend_url}
+ENVFILE
+
+npm ci --no-fund --no-audit
+npx prisma generate
+npx prisma db push --accept-data-loss
+npm run build
+
+cat > /etc/systemd/system/videon-api.service << 'UNIT'
+[Unit]
+Description=Videon API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/videon/server
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node dist/src/server.js
+Restart=always
+RestartSec=10s
+StandardOutput=append:/var/log/videon-api.log
+StandardError=append:/var/log/videon-api.log
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now videon-api
+
+for i in $(seq 1 60); do
+  if curl -sf http://127.0.0.1:8000/api/v1/health > /dev/null; then
+    exit 0
+  fi
+  sleep 5
+done
+echo "videon-api failed to become healthy" >&2
+exit 1

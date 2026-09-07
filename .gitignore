@@ -32,6 +32,15 @@ yarn-error.log*
 # terraform
 *.tfvars
 !*.tfvars.example
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
 # IDEs
 .idea/

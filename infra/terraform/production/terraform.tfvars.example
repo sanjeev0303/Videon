@@ -1,0 +1,42 @@
+aws_region                = "ap-south-1"
+zone_name                 = "motionmesh.co.in"
+domain_name               = "videon.motionmesh.co.in"
+api_domain                = "api.videon.motionmesh.co.in"
+vpc_cidr                  = "10.30.0.0/16"
+azs                       = ["ap-south-1a", "ap-south-1b"]
+
+db_name                   = "videon"
+db_username               = "videon"
+db_password               = "CHANGE_ME"
+
+aurora_instance_class     = "db.t4g.medium"
+api_instance_type         = "t3.medium"
+client_instance_type      = "t3.small"
+key_name                  = ""
+
+github_repository         = "https://github.com/sanjeev0303/videon.git"
+github_branch             = "main"
+motionmesh_repository     = "https://github.com/sanjeev0303/motionmesh.git"
+
+# Peering to motionmesh (shared NATS + Redis)
+motionmesh_vpc_id          = "vpc-XXXXXXXXXXXX"
+motionmesh_vpc_cidr        = "10.20.0.0/16"
+motionmesh_nats_private_ip = "10.x.x.x"
+motionmesh_redis_endpoint  = "motionmesh-prod.XXXXXXXXXX.aps1.cache.amazonaws.com"
+
+clerk_publishable_key     = "pk_test_xxx"
+clerk_secret_key          = "sk_test_xxx"
+redis_key_secret          = "CHANGE_ME"
+analytics_jwt_secret      = "CHANGE_ME"
+videon_api_key            = "CHANGE_ME"
+
+motionmesh_api_key        = "CHANGE_ME"
+motionmesh_bucket_id      = "CHANGE_ME"
+motionmesh_transcode_bucket_id = "CHANGE_ME"
+motionmesh_base_url       = "https://api.motionmesh.co.in/v1"
+
+stripe_secret_key         = "sk_test_xxx"
+stripe_webhook_secret     = "whsec_xxx"
+stripe_price_starter      = "price_xxx"
+stripe_price_pro          = "price_xxx"
+stripe_price_business     = "price_xxx"

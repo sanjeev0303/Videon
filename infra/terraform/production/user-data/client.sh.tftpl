@@ -1,0 +1,68 @@
+#!/bin/bash
+set -euo pipefail
+
+apt-get update -y
+apt-get install -y ca-certificates curl gnupg unzip git
+
+fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list
+apt-get update -y
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin
+systemctl enable --now docker
+
+mkdir -p /opt/videon
+git clone --depth 1 --branch ${github_branch} ${github_repository} /opt/videon
+cd /opt/videon
+
+docker build \
+  --build-arg NEXT_PUBLIC_SERVER_URI=${next_public_server_uri} \
+  --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${clerk_publishable_key} \
+  -f client/Dockerfile \
+  -t videon-client:latest \
+  .
+
+cat > /etc/systemd/system/videon-client.service << 'UNIT'
+[Unit]
+Description=Videon Client
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Restart=always
+RestartSec=10s
+ExecStartPre=-/usr/bin/docker rm -f videon-client
+ExecStart=/usr/bin/docker run --rm \
+  --name videon-client \
+  -p 3000:3000 \
+  -e CLERK_SECRET_KEY=${clerk_secret_key} \
+  -e VIDEON_API_KEY=${videon_api_key} \
+  -e VIDEON_BASE_URL=${videon_base_url} \
+  --log-driver awslogs \
+  --log-opt awslogs-region=${aws_region} \
+  --log-opt awslogs-group=/videon/client \
+  videon-client:latest
+ExecStop=/usr/bin/docker stop videon-client
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now videon-client
+
+for i in $(seq 1 60); do
+  if curl -sf http://127.0.0.1:3000/ > /dev/null; then
+    exit 0
+  fi
+  sleep 5
+done
+echo "videon-client failed to become healthy" >&2
+exit 1
