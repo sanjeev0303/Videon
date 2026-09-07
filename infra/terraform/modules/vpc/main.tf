@@ -63,6 +63,12 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.this.id
   }
 
+  lifecycle {
+    # Peering return route (10.30.0.0/16 -> motionmesh) is managed by
+    # the standalone aws_route resource in production/main.tf.
+    ignore_changes = [route]
+  }
+
   tags = {
     Name = "${var.name}-public-rt"
   }
@@ -100,6 +106,11 @@ resource "aws_route_table" "private" {
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.this.id
+  }
+
+  lifecycle {
+    # Peering return route is managed by the standalone aws_route in main.tf.
+    ignore_changes = [route]
   }
 
   tags = {
