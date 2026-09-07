@@ -29,6 +29,10 @@ yarn-error.log*
 .env.*
 !.env.example
 
+# terraform
+*.tfvars
+!*.tfvars.example
+
 # IDEs
 .idea/
 .vscode/

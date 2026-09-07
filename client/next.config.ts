@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   transpilePackages: ["@videon/sdk", "@videon/player", "@vidstack/react", "vidstack"],
   experimental: {
     turbopackFileSystemCacheForDev: false,
